@@ -1,3 +1,11 @@
+/*
+ * @Description: 
+ * @Author: Tobi
+ * @version: 
+ * @Date: 2026-09-16 14:14:37
+ * @LastEditors: Tobi
+ * @LastEditTime: 2026-09-16 14:56:30
+ */
 const { loadConfig } = require('./config/index.js');
 
 const preConfig = loadConfig();
@@ -11,6 +19,9 @@ if (insecureTlsOn) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   console.warn('[config] server.insecure_tls 已启用：全局跳过 TLS 证书校验，仅用于测试');
 }
+
+const { setupOutboundProxy } = require('./utils/proxySupport.js');
+setupOutboundProxy(preConfig);
 
 const { createApp } = require('./app.js');
 const { closeDb } = require('./db/index.js');

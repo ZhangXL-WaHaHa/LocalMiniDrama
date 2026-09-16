@@ -2014,6 +2014,18 @@ async function callViduVideoApi(config, log, opts) {
   const defaultEp = hasImage ? '/ent/v2/img2video' : '/ent/v2/text2video';
   let ep = config.endpoint || defaultEp;
   if (!ep.startsWith('/')) ep = '/' + ep;
+  // 自定义 endpoint 与实际模式不匹配时自动回退默认端点（img2video 必须带一张图，text2video 不带图）
+  const epLooksImg2Video = /img2video/i.test(ep);
+  const epLooksText2Video = /text2video/i.test(ep);
+  if ((!hasImage && epLooksImg2Video) || (hasImage && epLooksText2Video)) {
+    log.warn('[Vidu] 自定义 endpoint 与实际模式不匹配，已自动回退默认端点', {
+      video_gen_id,
+      configured_endpoint: ep,
+      mode: hasImage ? 'img2video' : 'text2video',
+      fallback_endpoint: defaultEp,
+    });
+    ep = defaultEp;
+  }
   const url = base + ep;
 
   let effectivePrompt = (prompt || '').trim();
