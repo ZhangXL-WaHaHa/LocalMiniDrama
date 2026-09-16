@@ -24,9 +24,9 @@ storage:
 video:
   generation_timeout_minutes: 30
 ai:
-  default_text_provider: openai
-  default_image_provider: openai
-  default_video_provider: doubao
+  default_text_provider: agnes
+  default_image_provider: agnes
+  default_video_provider: agnes
 network:
   # 出站代理：被 DNS 污染/直连受限的 AI 域名（如 api.vectorengine.ai）经此代理访问；
   # 留空禁用；环境变量 HTTPS_PROXY/HTTP_PROXY 优先生效

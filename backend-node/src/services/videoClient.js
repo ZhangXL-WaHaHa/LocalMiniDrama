@@ -341,7 +341,7 @@ async function resolveImageInputForOmniAsync(rawUrl, files_base_url, storage_loc
   if (!raw) return null;
   if (raw.startsWith('data:')) return raw;
 
-  const isPublicHttp = /^https?:\/\//i.test(raw) && !/localhost|127\.0\.0\.1/i.test(raw);
+  const isPublicHttp = isPublicHttpUrl(raw);
   if (isPublicHttp) return raw;
 
   if (storage_local_path) {
@@ -375,7 +375,7 @@ async function resolveVolcOmniImageAsync(rawUrl, files_base_url, storage_local_p
   if (!raw) return null;
   if (raw.startsWith('data:')) return raw;
 
-  const isPublicHttp = /^https?:\/\//i.test(raw) && !/localhost|127\.0\.0\.1/i.test(raw);
+  const isPublicHttp = isPublicHttpUrl(raw);
   if (isPublicHttp) return raw;
 
   if (storage_local_path && !useImageProxyForVideo()) {
@@ -402,8 +402,29 @@ async function resolveVolcOmniImageAsync(rawUrl, files_base_url, storage_local_p
 /**
  * Agnes Video：仅接受公网 http(s) 图片 URL，本地/localhost 须先上传图床，禁止 base64。
  */
+function isPrivateIpv4(hostname) {
+  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(hostname);
+  if (!m) return false;
+  const a = Number(m[1]);
+  const b = Number(m[2]);
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 169 && b === 254) return true;
+  return false;
+}
+
 function isPublicHttpUrl(url) {
-  return /^https?:\/\//i.test(url) && !/localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(url);
+  if (!/^https?:\/\//i.test(url)) return false;
+  let h;
+  try { h = new URL(url).hostname.toLowerCase(); } catch { return false; }
+  if (!h) return false;
+  if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local') || h.endsWith('.internal')) return false;
+  const bare = h.replace(/^\[|\]$/g, '');
+  if (bare === '::1' || bare === '::') return false;
+  if (/^f[cd][0-9a-f:]+$/.test(bare)) return false; // IPv6 ULA fc00::/7
+  if (/^fe80[0-9a-f:]*$/.test(bare)) return false; // IPv6 link-local
+  return !isPrivateIpv4(h);
 }
 
 function isPublicFilesBaseUrl(files_base_url) {
@@ -3056,7 +3077,7 @@ async function resolveJimengApiImageBuffer(rawUrl, files_base_url, storage_local
       }
     } catch (_) {}
   }
-  const isPublicHttp = /^https?:\/\//i.test(raw) && !/localhost|127\.0\.0\.1/i.test(raw);
+  const isPublicHttp = isPublicHttpUrl(raw);
   if (isPublicHttp) {
     const res = await fetch(raw);
     if (!res.ok) throw new Error('拉取参考图失败 HTTP ' + res.status);
@@ -4642,6 +4663,7 @@ module.exports = {
   pollVideoTask,
   normalizeAspectRatioForApi,
   isPlausibleHttpVideoUrl,
+  isPublicHttpUrl,
   pickProxyVideoUrl,
   extractAgnesVideoUrl,
   buildAgnesPollUrl,
