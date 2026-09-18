@@ -807,7 +807,7 @@ async function deleteAsset(row) {
 .field-hint {
   margin: 6px 0 0;
   font-size: 12px;
-  color: #909399;
+  color: #9b958c;
   line-height: 1.5;
 }
 .field-hint code {

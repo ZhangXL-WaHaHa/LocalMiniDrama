@@ -50,14 +50,14 @@ function close() {
   min-width: 140px;
   padding: 6px 0;
   border-radius: 8px;
-  border: 1px solid #3f3f46;
-  background: #18181b;
+  border: 1px solid #4a453f;
+  background: #171513;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 .ctx-title {
   padding: 4px 12px 6px;
   font-size: 10px;
-  color: #71717a;
+  color: #8b8478;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -67,18 +67,18 @@ function close() {
   padding: 8px 12px;
   border: none;
   background: transparent;
-  color: #e4e4e7;
+  color: #e6e0d6;
   font-size: 13px;
   text-align: left;
   cursor: pointer;
 }
 .ctx-item:hover {
-  background: rgba(129, 140, 248, 0.15);
-  color: #c7d2fe;
+  background: rgba(220, 174, 95,   0.15);
+  color: #f0d6a6;
 }
 .ctx-divider {
   height: 1px;
   margin: 4px 0;
-  background: #3f3f46;
+  background: #4a453f;
 }
 </style>

@@ -213,6 +213,36 @@ function listDramas(db, query) {
             spMap[row.storyboard_id].push(row.prop_id);
           }
           for (const sb of ep.storyboards) sb.prop_ids = spMap[sb.id] || [];
+          // 封面解析：优先 image_generations 中的成片帧（与工作台 resolveSbFirstImageRecord 逻辑一致，排除宫格参考图）
+          if (!d.thumbnail) {
+            const igRows = db.prepare(
+              `SELECT id, storyboard_id, frame_type, local_path, image_url FROM image_generations
+               WHERE storyboard_id IN (${placeholders}) AND deleted_at IS NULL AND status = 'completed'
+                 AND (frame_type IS NULL OR frame_type NOT IN ('quad_grid', 'nine_grid'))
+               ORDER BY id ASC`
+            ).all(...sbIds);
+            const imgBySb = {};
+            for (const r of igRows) {
+              if (!r.local_path && !r.image_url) continue;
+              (imgBySb[r.storyboard_id] = imgBySb[r.storyboard_id] || []).push(r);
+            }
+            for (const sb of ep.storyboards) {
+              if (d.thumbnail) break;
+              const imgs = imgBySb[sb.id] || [];
+              const rec =
+                imgs.find((i) => sb.first_frame_image_id != null && i.id === sb.first_frame_image_id) ||
+                imgs.find((i) => ['storyboard_first', 'first', 'first_frame'].includes(String(i.frame_type || '').toLowerCase())) ||
+                imgs[0];
+              if (rec) {
+                const lp = rec.local_path && String(rec.local_path).trim();
+                d.thumbnail = lp ? '/static/' + lp.replace(/^\//, '') : String(rec.image_url || '').trim() || null;
+              } else {
+                const lp = sb.local_path && String(sb.local_path).trim();
+                if (lp) d.thumbnail = '/static/' + lp.replace(/^\//, '');
+                else if (sb.image_url && String(sb.image_url).trim()) d.thumbnail = String(sb.image_url).trim();
+              }
+            }
+          }
         }
       } catch (_) {}
       ep.duration = ep.storyboards.reduce((sum, s) => sum + (s.duration || 0), 0);

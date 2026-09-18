@@ -330,7 +330,7 @@ async function pollVideoTask(taskId, item) {
 <style scoped>
 .free-create-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: #f5f2ed;
   padding: 20px;
 }
 
@@ -348,12 +348,12 @@ async function pollVideoTask(taskId, item) {
 .page-title {
   font-size: 22px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: #161412;
   margin: 0;
 }
 
 .page-desc {
-  color: #6b7280;
+  color: #7d766c;
   font-size: 14px;
   margin: 0;
 }
@@ -384,7 +384,7 @@ async function pollVideoTask(taskId, item) {
 .form-label {
   font-size: 13px;
   font-weight: 500;
-  color: #374151;
+  color: #4a443c;
   margin-bottom: 6px;
 }
 
@@ -441,12 +441,12 @@ async function pollVideoTask(taskId, item) {
 
 .upload-icon {
   font-size: 28px;
-  color: #9ca3af;
+  color: #a8a29a;
 }
 
 .upload-tip {
   font-size: 12px;
-  color: #9ca3af;
+  color: #a8a29a;
 }
 
 .generate-btn {
@@ -473,7 +473,7 @@ async function pollVideoTask(taskId, item) {
 .result-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: #161412;
 }
 
 .empty-result {
@@ -482,7 +482,7 @@ async function pollVideoTask(taskId, item) {
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: #9ca3af;
+  color: #a8a29a;
   gap: 12px;
 }
 
@@ -506,13 +506,13 @@ async function pollVideoTask(taskId, item) {
 }
 
 .result-item {
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e7e2da;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .result-media {
-  background: #f9fafb;
+  background: #f5efe5;
   aspect-ratio: 16/9;
   display: flex;
   align-items: center;
@@ -539,7 +539,7 @@ async function pollVideoTask(taskId, item) {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  color: #6b7280;
+  color: #7d766c;
   font-size: 12px;
 }
 
@@ -553,7 +553,7 @@ async function pollVideoTask(taskId, item) {
 
 .result-prompt {
   font-size: 12px;
-  color: #6b7280;
+  color: #7d766c;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

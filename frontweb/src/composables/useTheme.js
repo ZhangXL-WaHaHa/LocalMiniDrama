@@ -1,7 +1,8 @@
 import { ref, watchEffect } from 'vue'
 
 const STORAGE_KEY = 'lmd-theme'
-const isDark = ref(localStorage.getItem(STORAGE_KEY) === 'dark')
+// 默认暗色（芒果灵创风格），仅当显式保存过 light 时才用亮色
+const isDark = ref(localStorage.getItem(STORAGE_KEY) !== 'light')
 
 function apply() {
   if (isDark.value) {

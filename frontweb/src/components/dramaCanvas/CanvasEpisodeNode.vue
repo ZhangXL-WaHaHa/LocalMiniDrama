@@ -22,9 +22,9 @@ defineProps({
   gap: 10px;
   padding: 8px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(167, 139, 250, 0.5);
-  background: rgba(76, 29, 149, 0.35);
-  color: #e9d5ff;
+  border: 1px solid rgba(220, 174, 95,   0.5);
+  background: rgba(140, 100, 37,   0.35);
+  color: #f2ddba;
   font-size: 13px;
   white-space: nowrap;
 }

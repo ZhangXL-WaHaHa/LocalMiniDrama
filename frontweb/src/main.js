@@ -1,4 +1,8 @@
 import { createApp, h } from 'vue'
+import '@fontsource/noto-sans-sc/400.css'
+import '@fontsource/noto-sans-sc/500.css'
+import '@fontsource/noto-sans-sc/700.css'
+import '@fontsource/noto-sans-sc/900.css'
 import './styles/theme.css'
 // 初始化主题（必须在挂载前执行）
 import './composables/useTheme.js'

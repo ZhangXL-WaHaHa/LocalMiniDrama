@@ -177,13 +177,13 @@ async function onExtractAll() {
   margin: 0 0 10px;
   font-size: 10px;
   line-height: 1.45;
-  color: #71717a;
+  color: #8b8478;
 }
 .compact-form :deep(.el-form-item) {
   margin-bottom: 8px;
 }
 .compact-form :deep(.el-form-item__label) {
-  color: #71717a;
+  color: #8b8478;
   font-size: 11px;
 }
 .compact-form :deep(.el-textarea__inner) {
@@ -196,18 +196,18 @@ async function onExtractAll() {
   justify-content: space-between;
   gap: 8px;
   font-size: 10px;
-  color: #a1a1aa;
+  color: #b3aca0;
   margin-bottom: 8px;
 }
 .len {
-  color: #71717a;
+  color: #8b8478;
 }
 .panel-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(63, 63, 70, 0.6);
+  border-top: 1px solid rgba(74, 69, 63,  0.6);
 }
 .panel-actions :deep(.el-button) {
   margin: 0;

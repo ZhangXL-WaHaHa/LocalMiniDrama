@@ -333,7 +333,7 @@ function highlightRelated() {
   border-radius: 10px;
   overflow: hidden;
   background: #09090b;
-  border: 1px solid #3f3f46;
+  border: 1px solid #4a453f;
 }
 .preview-box img {
   width: 100%;
@@ -359,7 +359,7 @@ function highlightRelated() {
   gap: 6px;
   background: rgba(9, 9, 11, 0.82);
   font-size: 10px;
-  color: #d4d4d8;
+  color: #d8d2cb;
   text-align: center;
   padding: 6px;
 }
@@ -375,7 +375,7 @@ function highlightRelated() {
   margin-top: 6px;
   font-size: 10px;
   text-align: center;
-  color: #71717a;
+  color: #8b8478;
 }
 .entity-status.st-processing { color: #60a5fa; }
 .entity-status.st-completed { color: #34d399; }
@@ -388,7 +388,7 @@ function highlightRelated() {
   margin-bottom: 6px;
 }
 .compact-form :deep(.el-form-item__label) {
-  color: #71717a;
+  color: #8b8478;
   font-size: 11px;
   padding-right: 6px;
 }
@@ -415,7 +415,7 @@ function highlightRelated() {
   gap: 8px;
   margin-top: 10px;
   padding-top: 8px;
-  border-top: 1px solid rgba(63, 63, 70, 0.6);
+  border-top: 1px solid rgba(74, 69, 63,  0.6);
 }
 .panel-actions :deep(.el-button) {
   margin: 0;

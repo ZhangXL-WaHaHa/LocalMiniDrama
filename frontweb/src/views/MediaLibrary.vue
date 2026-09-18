@@ -267,7 +267,7 @@ onMounted(loadMedia)
 <style scoped>
 .media-library-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: #f5f2ed;
   padding: 20px;
 }
 
@@ -287,7 +287,7 @@ onMounted(loadMedia)
 .page-title {
   font-size: 22px;
   font-weight: 600;
-  color: #1a1a2e;
+  color: #161412;
   margin: 0;
 }
 
@@ -339,7 +339,7 @@ onMounted(loadMedia)
 
 .media-thumb {
   aspect-ratio: 1;
-  background: #f3f4f6;
+  background: #f3efe9;
   overflow: hidden;
   position: relative;
 }
@@ -392,7 +392,7 @@ onMounted(loadMedia)
 .media-name {
   display: block;
   font-size: 12px;
-  color: #374151;
+  color: #4a443c;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -400,7 +400,7 @@ onMounted(loadMedia)
 
 .media-meta {
   font-size: 11px;
-  color: #9ca3af;
+  color: #a8a29a;
 }
 
 .empty-media {
@@ -410,7 +410,7 @@ onMounted(loadMedia)
   align-items: center;
   justify-content: center;
   height: 300px;
-  color: #9ca3af;
+  color: #a8a29a;
   gap: 12px;
 }
 
@@ -429,7 +429,7 @@ onMounted(loadMedia)
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1a1a2e;
+  background: #161412;
   color: #fff;
   padding: 10px 20px;
   border-radius: 24px;
@@ -467,12 +467,12 @@ onMounted(loadMedia)
 
 .meta-row {
   font-size: 13px;
-  color: #6b7280;
+  color: #7d766c;
   margin-bottom: 4px;
 }
 
 .meta-row span {
   font-weight: 500;
-  color: #374151;
+  color: #4a443c;
 }
 </style>

@@ -2297,9 +2297,9 @@ onMounted(() => {
 
 /* 文本/对话 — 蓝色 */
 .type-text {
-  background: rgba(59, 130, 246, 0.12);
-  color: #3b82f6;
-  border-color: rgba(59, 130, 246, 0.25);
+  background: rgba(55, 161, 255, 0.14);
+  color: #9bd4ff;
+  border-color: rgba(55, 161, 255, 0.32);
 }
 /* 文本生成图片 — 绿色 */
 .type-image {
@@ -2309,15 +2309,15 @@ onMounted(() => {
 }
 /* 分镜图片生成 — 紫色 */
 .type-storyboard_image {
-  background: rgba(139, 92, 246, 0.12);
-  color: #8b5cf6;
-  border-color: rgba(139, 92, 246, 0.25);
+  background: rgba(220, 174, 95,   0.12);
+  color: #dcae5f;
+  border-color: rgba(220, 174, 95,   0.25);
 }
 /* 视频 — 橙色 */
 .type-video {
-  background: rgba(249, 115, 22, 0.12);
+  background: rgba(220, 174, 95, 0.12);
   color: #f97316;
-  border-color: rgba(249, 115, 22, 0.25);
+  border-color: rgba(220, 174, 95, 0.25);
 }
 .jimeng2-assets-actions {
   display: flex;
@@ -2340,13 +2340,13 @@ onMounted(() => {
 }
 
 .type-model_ark_asset {
-  background: rgba(99, 102, 241, 0.12);
-  color: #6366f1;
-  border-color: rgba(99, 102, 241, 0.25);
+  background: rgba(201, 151, 63,   0.12);
+  color: #c9973f;
+  border-color: rgba(201, 151, 63,   0.25);
 }
 
 .no-default {
-  color: #9ca3af;
+  color: #a8a29a;
   font-size: 13px;
 }
 .one-key-tip {
@@ -2372,7 +2372,7 @@ onMounted(() => {
   gap: 12px;
 }
 .one-key-section {
-  background: var(--el-fill-color-light, #f5f7fa);
+  background: var(--el-fill-color-light, #f5f2ed);
   border-radius: 8px;
   padding: 12px 14px;
 }
@@ -2402,14 +2402,14 @@ onMounted(() => {
 .one-key-note {
   margin: 6px 0 0;
   font-size: 12px;
-  color: var(--el-text-color-secondary, #909399);
+  color: var(--el-text-color-secondary, #9b958c);
   line-height: 1.5;
 }
 .one-key-note + .one-key-note {
   margin-top: 4px;
 }
 code {
-  background: var(--el-fill-color, #f0f2f5);
+  background: var(--el-fill-color, #f3efe9);
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 12px;
@@ -2459,7 +2459,7 @@ code {
 .field-tip {
   margin: 6px 0 0;
   font-size: 12px;
-  color: #909399;
+  color: #9b958c;
   line-height: 1.4;
 }
 .form-label-tip {
@@ -2473,7 +2473,7 @@ code {
   font-weight: 600;
   color: #606266;
   padding: 4px 0 6px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid #eae5dd;
   margin-bottom: 4px;
 }
 .ph-tag {
@@ -2501,7 +2501,7 @@ code {
   color: #303133;
 }
 .protocol-help .ph-body pre {
-  background: #f5f7fa;
+  background: #f5f2ed;
   border-radius: 4px;
   padding: 8px 12px;
   font-size: 12px;
@@ -2512,14 +2512,14 @@ code {
   word-break: break-all;
 }
 .protocol-help .ph-body code {
-  background: #f0f2f5;
+  background: #f3efe9;
   padding: 1px 5px;
   border-radius: 3px;
   font-size: 12px;
 }
 .tip-icon {
   font-size: 13px;
-  color: #909399;
+  color: #9b958c;
   cursor: pointer;
   flex-shrink: 0;
   transition: color 0.15s;
@@ -2528,7 +2528,7 @@ code {
   color: #409eff;
 }
 .endpoint-preview-box {
-  background: #f0f7ff;
+  background: #f5f0e9;
   border: 1px solid #c6e0ff;
   border-radius: 6px;
   padding: 10px 14px;
@@ -2582,7 +2582,7 @@ code {
 .ep-tip {
   margin: 8px 0 0;
   font-size: 11px;
-  color: #909399;
+  color: #9b958c;
   line-height: 1.4;
 }
 .ep-tip-warn {
@@ -2634,7 +2634,7 @@ code {
 }
 .gs-tip-box {
   margin-top: 20px;
-  background: #f5f7fa;
+  background: #f5f2ed;
   border-radius: 8px;
   padding: 14px 16px;
   font-size: 13px;
@@ -2651,7 +2651,7 @@ code {
   line-height: 1.8;
 }
 .gs-tip-note {
-  color: #909399;
+  color: #9b958c;
   font-size: 12px;
 }
 </style>

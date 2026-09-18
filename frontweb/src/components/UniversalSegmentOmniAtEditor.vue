@@ -490,13 +490,13 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 .omni-at-copy-btn {
-  color: #a78bfa !important;
+  color: #dcae5f !important;
 }
 .omni-at-copy-btn:hover {
-  color: #c4b5fd !important;
+  color: #ecc98f !important;
 }
 html.light .omni-at-copy-btn {
-  color: #6d28d9 !important;
+  color: #ab7c30 !important;
 }
 .omni-at-editor {
   flex: 1;
@@ -506,7 +506,7 @@ html.light .omni-at-copy-btn {
   padding: 8px 11px;
   font-size: 13px;
   line-height: 1.55;
-  color: #e5e7eb;
+  color: #e7e2da;
   background: var(--omni-editor-bg, #141414);
   border: 1px solid #4c4d4f;
   border-radius: 4px;
@@ -515,12 +515,12 @@ html.light .omni-at-copy-btn {
   word-break: break-word;
 }
 .omni-at-editor:focus {
-  border-color: #a78bfa;
-  box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.25) inset;
+  border-color: #dcae5f;
+  box-shadow: 0 0 0 1px rgba(220, 174, 95,   0.25) inset;
 }
 .omni-at-editor:empty::before {
   content: attr(data-placeholder);
-  color: #6b7280;
+  color: #7d766c;
   pointer-events: none;
 }
 :deep(.omni-at-chip) {
@@ -531,33 +531,33 @@ html.light .omni-at-copy-btn {
   padding: 0 5px;
   border-radius: 4px;
   font-weight: 600;
-  color: #c4b5fd;
-  background: rgba(139, 92, 246, 0.22);
-  border: 1px solid rgba(167, 139, 250, 0.45);
+  color: #ecc98f;
+  background: rgba(220, 174, 95,   0.22);
+  border: 1px solid rgba(220, 174, 95,   0.45);
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
 }
 :deep(.omni-at-chip:hover) {
-  background: rgba(139, 92, 246, 0.38);
-  border-color: #a78bfa;
+  background: rgba(220, 174, 95,   0.38);
+  border-color: #dcae5f;
 }
 html.light .omni-at-editor {
-  color: #1f2937;
+  color: #332e27;
   background: var(--el-fill-color-blank, #fff);
   border-color: var(--el-border-color, #dcdfe6);
 }
 html.light .omni-at-editor:focus {
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.2) inset;
+  border-color: #c9973f;
+  box-shadow: 0 0 0 1px rgba(201, 151, 63,   0.2) inset;
 }
 html.light :deep(.omni-at-chip) {
-  color: #5b21b6;
-  background: rgba(124, 58, 237, 0.12);
-  border-color: rgba(124, 58, 237, 0.35);
+  color: #8c6425;
+  background: rgba(201, 151, 63,   0.12);
+  border-color: rgba(201, 151, 63,   0.35);
 }
 html.light :deep(.omni-at-chip:hover) {
-  background: rgba(124, 58, 237, 0.2);
+  background: rgba(201, 151, 63,   0.2);
 }
 </style>
 
@@ -568,24 +568,24 @@ html.light :deep(.omni-at-chip:hover) {
   overflow-y: auto;
   padding: 8px;
   border-radius: 8px;
-  background: #1e293b;
+  background: #1f1d1b;
   border: 1px solid rgba(248, 250, 252, 0.18);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 html.light .omni-at-menu {
   background: #fff;
-  border-color: #e2e8f0;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  border-color: #e5dfd6;
+  box-shadow: 0 12px 28px rgba(43, 35, 24, 0.12);
 }
 .omni-at-menu-empty {
   font-size: 12px;
-  color: #94a3b8;
+  color: #a8a29a;
   padding: 8px 6px;
   max-width: 260px;
   line-height: 1.45;
 }
 html.light .omni-at-menu-empty {
-  color: #64748b;
+  color: #7d766c;
 }
 .omni-at-menu-item {
   display: flex;
@@ -597,7 +597,7 @@ html.light .omni-at-menu-empty {
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: #f1f5f9;
+  color: #f1ede7;
   cursor: pointer;
   text-align: left;
 }
@@ -605,13 +605,13 @@ html.light .omni-at-menu-empty {
   margin-bottom: 0;
 }
 .omni-at-menu-item:hover {
-  background: rgba(148, 163, 184, 0.15);
+  background: rgba(160, 152, 142,  0.15);
 }
 html.light .omni-at-menu-item {
-  color: #0f172a;
+  color: #120f0d;
 }
 html.light .omni-at-menu-item:hover {
-  background: #f1f5f9;
+  background: #f1ede7;
 }
 .omni-at-menu-thumb-wrap {
   flex-shrink: 0;
@@ -619,12 +619,12 @@ html.light .omni-at-menu-item:hover {
   height: 44px;
   border-radius: 6px;
   overflow: hidden;
-  background: #0f172a;
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #120f0d;
+  border: 1px solid rgba(160, 152, 142,  0.25);
 }
 html.light .omni-at-menu-thumb-wrap {
-  background: #f8fafc;
-  border-color: #e2e8f0;
+  background: #f9f6f2;
+  border-color: #e5dfd6;
 }
 .omni-at-menu-thumb {
   width: 100%;
@@ -640,7 +640,7 @@ html.light .omni-at-menu-thumb-wrap {
   height: 100%;
   font-size: 16px;
   font-weight: 600;
-  color: #64748b;
+  color: #7d766c;
 }
 .omni-at-menu-meta {
   display: flex;
@@ -656,24 +656,24 @@ html.light .omni-at-menu-thumb-wrap {
   width: fit-content;
   padding: 1px 5px;
   border-radius: 3px;
-  background: rgba(148, 163, 184, 0.2);
-  color: #cbd5e1;
+  background: rgba(160, 152, 142,  0.2);
+  color: #d0c9c0;
 }
 .omni-at-menu-tag--scene {
   background: rgba(34, 197, 94, 0.2);
   color: #86efac;
 }
 .omni-at-menu-tag--character {
-  background: rgba(59, 130, 246, 0.2);
-  color: #93c5fd;
+  background: rgba(55, 161, 255, 0.18);
+  color: #9bd4ff;
 }
 .omni-at-menu-tag--prop {
   background: rgba(245, 158, 11, 0.2);
   color: #fcd34d;
 }
 html.light .omni-at-menu-tag {
-  color: #475569;
-  background: #e2e8f0;
+  color: #5c554c;
+  background: #e5dfd6;
 }
 html.light .omni-at-menu-tag--scene {
   color: #166534;
@@ -690,28 +690,28 @@ html.light .omni-at-menu-tag--prop {
 .omni-at-menu-name {
   font-size: 12px;
   font-weight: 500;
-  color: #e2e8f0;
+  color: #e5dfd6;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 html.light .omni-at-menu-name {
-  color: #334155;
+  color: #3f3a33;
 }
 .omni-at-menu-at {
   font-size: 11px;
   font-family: ui-monospace, monospace;
-  color: #a78bfa;
+  color: #dcae5f;
 }
 .omni-at-menu-at-sub {
   font-size: 10px;
   font-family: ui-monospace, monospace;
-  color: #94a3b8;
+  color: #a8a29a;
 }
 html.light .omni-at-menu-at {
-  color: #6d28d9;
+  color: #ab7c30;
 }
 html.light .omni-at-menu-at-sub {
-  color: #64748b;
+  color: #7d766c;
 }
 </style>

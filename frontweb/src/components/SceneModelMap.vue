@@ -407,7 +407,7 @@ onMounted(() => {
 }
 
 .scene-key {
-  background: #f5f7fa;
+  background: #f5f2ed;
   padding: 2px 8px;
   border-radius: 4px;
   font-family: 'Courier New', monospace;

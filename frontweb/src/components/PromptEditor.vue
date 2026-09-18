@@ -207,20 +207,20 @@ onMounted(() => load())
   width: 220px;
   flex-shrink: 0;
   background: var(--bg-card, #fff);
-  border-right: 1px solid var(--border-color, #e4e4e7);
+  border-right: 1px solid var(--border-color, #e6e0d6);
   display: flex;
   flex-direction: column;
 }
 
 .sidebar-header {
   padding: 16px 20px;
-  border-bottom: 1px solid var(--border-color, #e4e4e7);
+  border-bottom: 1px solid var(--border-color, #e6e0d6);
 }
 
 .sidebar-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-bright, #18181b);
+  color: var(--text-bright, #171513);
 }
 
 .sidebar-menu {
@@ -243,11 +243,11 @@ onMounted(() => load())
 }
 
 .menu-item.active {
-  background: var(--el-color-primary-light-9, #f3e8ff);
+  background: var(--el-color-primary-light-9, #ffead9);
 }
 
 .menu-item.active .menu-label {
-  color: var(--el-color-primary, #7c3aed);
+  color: var(--el-color-primary, #c9973f);
   font-weight: 600;
 }
 
@@ -260,7 +260,7 @@ onMounted(() => load())
 
 .menu-label {
   font-size: 13px;
-  color: var(--text-bright, #18181b);
+  color: var(--text-bright, #171513);
   flex: 1;
 }
 
@@ -290,17 +290,17 @@ onMounted(() => load())
 .page-desc {
   margin: 0 0 20px;
   font-size: 13px;
-  color: var(--text-muted, #71717a);
+  color: var(--text-muted, #8b8478);
   line-height: 1.6;
   padding: 10px 14px;
   background: var(--bg-inner, #f8f8f8);
   border-radius: 8px;
-  border-left: 3px solid var(--el-color-primary, #7c3aed);
+  border-left: 3px solid var(--el-color-primary, #c9973f);
 }
 
 .prompt-card {
   background: var(--bg-card, #fff);
-  border: 1px solid var(--border-color, #e4e4e7);
+  border: 1px solid var(--border-color, #e6e0d6);
   border-radius: 12px;
   padding: 20px;
 }
@@ -319,7 +319,7 @@ onMounted(() => load())
 .prompt-label {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-bright, #18181b);
+  color: var(--text-bright, #171513);
 }
 
 .custom-tag {
@@ -329,7 +329,7 @@ onMounted(() => load())
 .prompt-desc {
   margin: 0;
   font-size: 12px;
-  color: var(--text-muted, #71717a);
+  color: var(--text-muted, #8b8478);
 }
 
 .section-label {
@@ -339,7 +339,7 @@ onMounted(() => load())
   margin-bottom: 8px;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-muted, #71717a);
+  color: var(--text-muted, #8b8478);
 }
 
 .section-label--locked {
@@ -382,6 +382,6 @@ onMounted(() => load())
   gap: 8px;
   justify-content: flex-end;
   padding-top: 16px;
-  border-top: 1px solid var(--border-color, #e4e4e7);
+  border-top: 1px solid var(--border-color, #e6e0d6);
 }
 </style>

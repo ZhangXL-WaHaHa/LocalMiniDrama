@@ -1,112 +1,225 @@
 <template>
   <div class="film-list">
-    <header class="header">
-      <div class="header-inner">
-        <h1 class="logo">
-          <span class="logo-main">本地短剧助手</span>
-          <span class="logo-sub">LocalMiniDrama</span>
-        </h1>
-        <!-- 公共资源库（左侧，靛紫调） -->
-        <div class="header-library">
-          <el-button class="btn-library" @click="showCharLibrary = true">
-            <el-icon><User /></el-icon>素材角色
-          </el-button>
-          <el-button class="btn-library" @click="showSceneLibrary = true">
-            <el-icon><PictureFilled /></el-icon>素材场景
-          </el-button>
-          <el-button class="btn-library" @click="showPropLibrary = true">
-            <el-icon><Box /></el-icon>素材道具
-          </el-button>
+    <!-- Hero：放映厅首映 —— 开场序列 + 宽银幕 -->
+    <section class="hero" @mousemove="onHeroMove">
+      <!-- 巨型背景字 -->
+      <div class="hero-backdrop" aria-hidden="true">CINEMA</div>
+      <!-- 散景光斑 -->
+      <div class="bokeh" aria-hidden="true">
+        <span v-for="(b, i) in bokehLights" :key="'bk' + i" :style="b"></span>
+      </div>
+      <!-- 中轴光柱（放映机主光） -->
+      <div class="godray" aria-hidden="true"></div>
+      <!-- 放映光束（扫动） -->
+      <div class="beam beam--left" aria-hidden="true"></div>
+      <div class="beam beam--right" aria-hidden="true"></div>
+      <!-- 光束中的尘埃 -->
+      <div class="hero-dust" aria-hidden="true">
+        <span
+          v-for="n in 14"
+          :key="'dust' + n"
+          :style="{ left: (6 + n * 6.6) + '%', animationDelay: (n * 0.7) + 's', animationDuration: (6 + (n % 5) * 1.6) + 's' }"
+        ></span>
+      </div>
+
+      <!-- 宽银幕（跑马灯上下边） -->
+      <div class="screen">
+        <div class="bulb-row" aria-hidden="true">
+          <span
+            v-for="n in 22"
+            :key="'bt' + n"
+            class="bulb"
+            :style="{ animationDelay: (n * -0.16) + 's' }"
+          ></span>
         </div>
-        <!-- 右侧操作区 -->
-        <div class="header-actions">
-          <!-- 暂时隐藏，功能待完善 -->
-          <!-- <el-button class="btn-library" title="自由创作" @click="$router.push('/free-create')">
-            <el-icon><MagicStick /></el-icon>自由创作
-          </el-button>
-          <el-button class="btn-library" title="媒体素材库" @click="$router.push('/media-library')">
-            <el-icon><Files /></el-icon>素材库
-          </el-button> -->
-          <el-button v-if="!vendorLockEnabled" class="btn-wechat" title="扫码联系作者" @click="showWechat = true">
-            <el-icon><ChatDotSquare /></el-icon>微信我
-          </el-button>
-          <el-button class="btn-theme" :title="isDark ? '切换到浅色模式' : '切换到暗色模式'" @click="toggleTheme">
-            <el-icon><Sunny v-if="isDark" /><Moon v-else /></el-icon>
-            {{ isDark ? '浅色' : '暗色' }}
-          </el-button>
-          <el-button class="btn-settings" @click="showAiConfigDialog = true">
-            <el-icon><Setting /></el-icon>AI配置
-          </el-button>
-          <el-button class="btn-import" :loading="importing" @click="triggerImport">
-            <el-icon><Upload /></el-icon>导入项目
-          </el-button>
-          <input ref="importFileInput" type="file" accept=".zip" style="display:none" @change="onImportFile" />
-          <el-button type="primary" class="btn-new" @click="goNewProject">
-            <el-icon><Plus /></el-icon>新建项目
-          </el-button>
+        <div class="screen-body">
+          <p class="hero-eyebrow">
+            <span class="eyebrow-star">★</span> NOW SHOWING · 本地上映 <span class="eyebrow-star">★</span>
+          </p>
+          <h1 class="hero-title">本地短剧助手</h1>
+          <p class="hero-billing">LOCAL MINI DRAMA STUDIO</p>
+          <p class="hero-sub">从剧本、分镜到成片 —— 一站式 AI 短剧创作工作台</p>
+          <div class="hero-actions">
+            <el-button type="primary" size="large" class="hero-btn-new" @click="goNewProject">
+              <el-icon><Plus /></el-icon>新建项目
+            </el-button>
+            <el-button size="large" class="hero-btn-import" :loading="importing" @click="triggerImport">
+              <el-icon><Upload /></el-icon>导入项目
+            </el-button>
+          </div>
+          <div class="hero-credits">
+            <span>AI 剧本</span><i aria-hidden="true"></i><span>智能分镜</span><i aria-hidden="true"></i><span>视频生成</span><i aria-hidden="true"></i><span>一站式生产</span>
+          </div>
+        </div>
+        <!-- 放映机闪烁 -->
+        <div class="projector-flicker" aria-hidden="true"></div>
+        <div class="bulb-row" aria-hidden="true">
+          <span
+            v-for="n in 22"
+            :key="'bb' + n"
+            class="bulb"
+            :style="{ animationDelay: (n * -0.16 + 1.2) + 's' }"
+          ></span>
         </div>
       </div>
-    </header>
+
+      <!-- 银幕地面光晕（舞台反光） -->
+      <div class="screen-reflection" aria-hidden="true"></div>
+
+      <!-- 票根统计 -->
+      <div v-if="dramas.length" class="ticket-row">
+        <div class="ticket">
+          <span class="ticket-num">{{ dramas.length }}</span>
+          <div class="ticket-info">
+            <b>项目</b>
+            <span>PROJECTS · ADMIT ALL</span>
+          </div>
+        </div>
+        <div class="ticket">
+          <span class="ticket-num">{{ totalEpisodes }}</span>
+          <div class="ticket-info">
+            <b>剧集</b>
+            <span>EPISODES · REEL</span>
+          </div>
+        </div>
+        <div class="ticket">
+          <span class="ticket-num">{{ totalStoryboardsCount }}</span>
+          <div class="ticket-info">
+            <b>分镜</b>
+            <span>STORYBOARDS · SCENE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 红幕布（覆盖整个放映厅，闭合 → 向两侧拉开） -->
+      <div class="curtain-reveal" aria-hidden="true">
+        <div class="reveal-half reveal-half--left"></div>
+        <div class="reveal-half reveal-half--right"></div>
+      </div>
+    </section>
 
     <main class="main">
+      <!-- 胶片画廊（风格卷轴，无限滚动） -->
+      <div class="reel-gallery" aria-hidden="true">
+        <div class="reel-track">
+          <div v-for="(g, i) in galleryLoop" :key="'gf' + i" class="reel-frame">
+            <img :src="g.thumb" alt="" loading="lazy" />
+            <span class="reel-frame-label">{{ g.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 正在上映 · 排片行 -->
+      <div class="now-showing">
+        <div class="ns-head">
+          <div class="ns-title-group">
+            <span class="ns-eyebrow">NOW SHOWING</span>
+            <h2 class="ns-title">正在上映</h2>
+            <span v-if="filteredDramas.length" class="ns-count">{{ filteredDramas.length }}</span>
+          </div>
+          <div class="toolbar-actions">
+            <el-input v-model="searchKeyword" class="toolbar-search" placeholder="搜索项目" clearable>
+              <template #prefix><el-icon><Search /></el-icon></template>
+            </el-input>
+            <el-dropdown trigger="click" @command="handleLibraryCmd">
+              <el-button class="btn-library">
+                <el-icon><FolderOpened /></el-icon>素材库<el-icon class="el-icon--right"><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="char"><el-icon><User /></el-icon>角色素材</el-dropdown-item>
+                  <el-dropdown-item command="scene"><el-icon><PictureFilled /></el-icon>场景素材</el-dropdown-item>
+                  <el-dropdown-item command="prop"><el-icon><Box /></el-icon>道具素材</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </div>
+        <div class="ns-rule" aria-hidden="true"><i></i></div>
+      </div>
+
       <div v-loading="loading" class="projects-wrap">
-        <div class="project-grid">
-          <!-- 操作卡片：始终作为第一个格子 -->
-          <div class="project-card action-card">
-            <div class="action-card-inner">
-              <h3 class="action-card-title">快速开始</h3>
-              <div class="action-card-buttons">
-                <el-button type="primary" size="large" class="action-btn action-btn-new" @click="goNewProject">
-                  <el-icon><Plus /></el-icon>新建短剧项目
-                </el-button>
-                <el-button size="large" class="action-btn action-btn-import" :loading="importing" @click="triggerImport">
-                  <el-icon><Upload /></el-icon>导入短剧项目
-                </el-button>
+        <div class="poster-grid">
+          <!-- 新建 / 导入（电影引片） -->
+          <div class="poster-card poster-card--new" @click="goNewProject">
+            <span class="leader-circle" aria-hidden="true"><el-icon><Plus /></el-icon></span>
+            <span class="new-card-text">新建短剧项目</span>
+          </div>
+          <div class="poster-card poster-card--new" @click="triggerImport">
+            <span class="leader-circle" :class="{ 'is-loading': importing }" aria-hidden="true">
+              <el-icon v-if="!importing"><Upload /></el-icon>
+              <el-icon v-else class="is-turning"><Loading /></el-icon>
+            </span>
+            <span class="new-card-text">{{ importing ? '导入中…' : '导入短剧项目' }}</span>
+          </div>
+
+          <div
+            v-for="d in filteredDramas"
+            :key="d.id"
+            class="poster-card"
+            @click="openProject(d.id)"
+          >
+            <div class="poster-media" :style="coverStyle(d)">
+              <img
+                v-if="posterImage(d) && !failedPosters.has(d.id)"
+                class="poster-img"
+                :src="posterImage(d)"
+                alt=""
+                loading="lazy"
+                @error="onPosterError(d)"
+              />
+              <span class="poster-glyph" v-else>{{ coverGlyph(d) }}</span>
+
+              <div class="poster-overlay">
+                <span class="poster-status" :class="'poster-status--' + (d.status || 'draft')">{{ formatStatus(d.status) }}</span>
+                <h3 class="poster-title">{{ d.title || '未命名项目' }}</h3>
+                <p class="poster-sub">
+                  <template v-if="d.episodes?.length">{{ d.episodes.length }} 集</template>
+                  <template v-if="totalStoryboards(d) > 0"> · {{ totalStoryboards(d) }} 分镜</template>
+                  <template v-if="d.style"> · {{ formatStyle(d.style) }}</template>
+                </p>
               </div>
-              <div v-if="exampleList.length > 0" class="action-card-example">
-                <div class="example-hint">
-                  <el-icon class="example-hint-icon"><QuestionFilled /></el-icon>
-                  <span class="example-hint-text">新手？试试导入示例项目快速体验</span>
-                </div>
-                <div class="example-list">
-                  <el-button
-                    v-for="ex in exampleList"
-                    :key="ex.filename"
-                    size="small"
-                    class="example-btn"
-                    :loading="importingExample === ex.filename"
-                    @click="onImportExample(ex)"
-                  >
-                    <el-icon><FolderOpened /></el-icon>{{ ex.name }}
-                  </el-button>
-                </div>
+
+              <div class="poster-actions" @click.stop>
+                <el-button size="small" circle :icon="Download" title="导出项目" :loading="exportingId === d.id" @click="onExport(d)" />
+                <el-button size="small" circle :icon="Edit" title="编辑" @click="openEditDialog(d)" />
+                <el-button size="small" type="danger" plain circle :icon="Delete" title="删除" @click="onDelete(d)" />
               </div>
             </div>
           </div>
-          <div
-            v-for="d in dramas"
-            :key="d.id"
-            class="project-card"
-            @click="openProject(d.id)"
-          >
-            <div class="project-card-actions" @click.stop>
-              <el-button size="small" circle :icon="Download" title="导出项目" :loading="exportingId === d.id" @click="onExport(d)" />
-              <el-button size="small" circle :icon="Edit" title="编辑" @click="openEditDialog(d)" />
-              <el-button size="small" type="danger" plain circle :icon="Delete" title="删除" @click="onDelete(d)" />
-            </div>
-            <div class="project-card-body">
-              <h3 class="project-title">{{ d.title || '未命名项目' }}</h3>
-              <p class="project-desc">{{ d.description || '暂无描述' }}</p>
-              <div class="project-badges">
-                <span class="badge badge-status" :class="'badge-status--' + (d.status || 'draft')">{{ formatStatus(d.status) }}</span>
-                <span v-if="d.episodes?.length" class="badge badge-episodes">{{ d.episodes.length }} 集</span>
-                <span v-if="totalStoryboards(d) > 0" class="badge badge-storyboards">{{ totalStoryboards(d) }} 分镜</span>
-                <span v-if="d.metadata?.aspect_ratio" class="badge badge-ratio">{{ d.metadata.aspect_ratio }}</span>
-                <span v-if="d.style" class="badge badge-style">{{ formatStyle(d.style) }}</span>
-                <span v-if="d.genre" class="badge badge-genre">{{ formatGenre(d.genre) }}</span>
-              </div>
-              <p class="project-meta">{{ formatDate(d.updated_at) }}</p>
-            </div>
+        </div>
+        <div v-if="!loading && filteredDramas.length === 0 && dramas.length > 0" class="empty">
+          <svg class="empty-illust" viewBox="0 0 120 100" aria-hidden="true">
+            <rect x="14" y="30" width="92" height="58" rx="8" fill="none" stroke="rgba(201, 151, 63, .35)" stroke-width="2"/>
+            <path d="M14 44 L106 30 L106 22 L14 36 Z" fill="rgba(201, 151, 63, .18)" stroke="rgba(201, 151, 63, .5)" stroke-width="2" stroke-linejoin="round"/>
+            <g fill="rgba(201, 151, 63, .5)">
+              <rect x="22" y="30" width="8" height="6" rx="1" transform="rotate(-8 26 33)"/>
+              <rect x="42" y="27" width="8" height="6" rx="1" transform="rotate(-8 46 30)"/>
+              <rect x="62" y="24" width="8" height="6" rx="1" transform="rotate(-8 66 27)"/>
+              <rect x="82" y="21" width="8" height="6" rx="1" transform="rotate(-8 86 24)"/>
+            </g>
+            <path d="M54 50 c0-2.2 2.4-3.5 4.3-2.4l13 8c1.9 1.1 1.9 3.7 0 4.8l-13 8c-1.9 1.1-4.3-.2-4.3-2.4v-16z" fill="rgba(220, 174, 95, .85)"/>
+          </svg>
+          <p class="empty-title">没有匹配的项目</p>
+          <p class="empty-desc">换个关键词试试</p>
+        </div>
+        <!-- 新手试映 -->
+        <div v-if="exampleList.length > 0" class="example-section">
+          <div class="example-hint">
+            <el-icon class="example-hint-icon"><QuestionFilled /></el-icon>
+            <span class="example-hint-text">新手试映 · 导入示例项目，快速体验全流程</span>
+          </div>
+          <div class="example-list">
+            <el-button
+              v-for="ex in exampleList"
+              :key="ex.filename"
+              size="small"
+              class="example-btn"
+              :loading="importingExample === ex.filename"
+              @click="onImportExample(ex)"
+            >
+              <el-icon><FolderOpened /></el-icon>{{ ex.name }}
+            </el-button>
           </div>
         </div>
       </div>
@@ -136,18 +249,13 @@
             <el-option label="4:3 传统横屏" value="4:3" />
             <el-option label="21:9 宽银幕" value="21:9" />
           </el-select>
-          <p style="margin: 4px 0 0; font-size: 12px; color: #71717a;">影响分镜图和视频的生成比例，短视频选 9:16</p>
+          <p style="margin: 4px 0 0; font-size: 12px; color: #8b8478;">影响分镜图和视频的生成比例，短视频选 9:16</p>
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showNewDialog = false">取消</el-button>
         <el-button type="primary" :loading="newSaving" :disabled="!newForm.title?.trim()" @click="submitNew">确定</el-button>
       </template>
-    </el-dialog>
-
-    <!-- AI 配置弹窗 -->
-    <el-dialog v-model="showAiConfigDialog" title="AI 配置" width="90%" destroy-on-close>
-      <AIConfigContent v-if="showAiConfigDialog" />
     </el-dialog>
 
     <!-- 公共角色库 -->
@@ -313,13 +421,8 @@
       </template>
     </el-dialog>
 
-    <!-- 微信二维码 -->
-    <el-dialog v-if="!vendorLockEnabled" v-model="showWechat" title="微信联系作者" width="320px" align-center>
-      <div style="text-align:center;padding:8px 0 4px">
-        <img src="/wx.jpg" alt="微信二维码" style="width:240px;height:240px;object-fit:contain;border-radius:8px;" />
-        <p style="margin:12px 0 0;font-size:13px;color:var(--text-secondary,#a1a1aa);">扫码添加微信，欢迎交流</p>
-      </div>
-    </el-dialog>
+    <!-- 导入文件输入（隐藏） -->
+    <input ref="importFileInput" type="file" accept=".zip" style="display:none" @change="onImportFile" />
 
     <!-- 图片放大预览 -->
     <Teleport to="body">
@@ -353,24 +456,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Edit, Delete, Setting, Plus, User, PictureFilled, Box, Sunny, Moon, ChatDotSquare, Download, Upload, QuestionFilled, FolderOpened, MagicStick, Files } from '@element-plus/icons-vue'
-import { useTheme } from '@/composables/useTheme'
+import { Edit, Delete, Plus, User, PictureFilled, Box, Download, Upload, QuestionFilled, FolderOpened, Search, ArrowDown, Loading } from '@element-plus/icons-vue'
+import { storyboardImageUrl } from '@/utils/mediaUrl'
 import { dramaAPI } from '@/api/drama'
 import { characterLibraryAPI } from '@/api/characterLibrary'
 import { sceneLibraryAPI } from '@/api/sceneLibrary'
 import { propLibraryAPI } from '@/api/propLibrary'
-import AIConfigContent from '@/components/AIConfigContent.vue'
 import { uploadAPI } from '@/api/upload'
-import { aiAPI } from '@/api/ai'
 import { imagesAPI } from '@/api/images'
 import { taskAPI } from '@/api/task'
-import { getStyleLabel } from '@/constants/styleOptions'
+import { getStyleLabel, generationStyleOptions } from '@/constants/styleOptions'
 
 const router = useRouter()
-const { isDark, toggle: toggleTheme } = useTheme()
 
 // 库编辑图片 – 文件输入 refs
 const charLibFileRef  = ref(null)
@@ -432,9 +532,102 @@ const loading = ref(false)
 const dramas = ref([])
 const total = ref(0)
 
-const showAiConfigDialog = ref(false)
-const showWechat = ref(false)
-const vendorLockEnabled = ref(false)
+// 搜索与统计
+const searchKeyword = ref('')
+const filteredDramas = computed(() => {
+  const kw = searchKeyword.value.trim().toLowerCase()
+  if (!kw) return dramas.value
+  return dramas.value.filter((d) =>
+    (d.title || '').toLowerCase().includes(kw) ||
+    (d.description || '').toLowerCase().includes(kw)
+  )
+})
+const totalEpisodes = computed(() => dramas.value.reduce((sum, d) => sum + (d.episodes?.length || 0), 0))
+const totalStoryboardsCount = computed(() => dramas.value.reduce((sum, d) => sum + totalStoryboards(d), 0))
+
+// 封面占位：按项目 id 从影院色系（金/绛红/香槟/夜紫/蓝调）渐变中取色
+const coverPalettes = [
+  ['rgba(201, 151, 63, .17)', 'rgba(46, 28, 14, .05)'],
+  ['rgba(138, 31, 43, .16)', 'rgba(40, 14, 18, .05)'],
+  ['rgba(220, 174, 95, .13)', 'rgba(46, 28, 14, .04)'],
+  ['rgba(155, 111, 232, .12)', 'rgba(38, 14, 18, .04)'],
+  ['rgba(55, 161, 255, .10)', 'rgba(20, 24, 32, .05)'],
+]
+function coverStyle(d) {
+  const [from, to] = coverPalettes[(d.id ?? 0) % coverPalettes.length]
+  return { background: `linear-gradient(135deg, ${from}, ${to})` }
+}
+function coverGlyph(d) {
+  return (d.title || '剧').trim().charAt(0).toUpperCase() || '剧'
+}
+
+// 海报画面：后端已按首帧逻辑解析好 cover（dramas.thumbnail），优先使用
+const failedPosters = ref(new Set())
+function posterImage(d) {
+  if (d.thumbnail) return d.thumbnail
+  // 兼容：旧数据无 thumbnail 时回退到首个有图分镜
+  for (const ep of d.episodes || []) {
+    for (const sb of ep.storyboards || []) {
+      const u = storyboardImageUrl(sb)
+      if (u) return u
+    }
+  }
+  return ''
+}
+function onPosterError(d) {
+  failedPosters.value.add(d.id)
+}
+
+function handleLibraryCmd(cmd) {
+  if (cmd === 'char') showCharLibrary.value = true
+  else if (cmd === 'scene') showSceneLibrary.value = true
+  else if (cmd === 'prop') showPropLibrary.value = true
+}
+
+// 胶片画廊：精选画风缩略图（双份列表用于无缝循环滚动）
+const galleryValues = [
+  'cinematic', 'noir', 'retro film', 'anime style', 'sci-fi', 'cyberpunk',
+  'wuxia', 'ink-wash', 'historical', 'fantasy', 'comic', 'neo-chinese-guochao',
+  'watercolor', 'steampunk', 'dark-fantasy', 'korean-romance-webtoon',
+]
+const styleIndex = new Map(
+  generationStyleOptions.flatMap((g) => g.options.map((o) => [o.value, o]))
+)
+const galleryFrames = galleryValues
+  .map((v) => styleIndex.get(v))
+  .filter((o) => o && o.thumb)
+  .map((o) => ({ label: o.label, thumb: o.thumb }))
+const galleryLoop = [...galleryFrames, ...galleryFrames]
+
+// 散景光斑（影院氛围景深）
+const bokehLights = [
+  { left: '6%', top: '14%', size: 96, color: 'rgba(220, 174, 95, .13)' },
+  { left: '20%', top: '58%', size: 140, color: 'rgba(138, 31, 43, .15)' },
+  { left: '34%', top: '10%', size: 60, color: 'rgba(201, 151, 63, .12)' },
+  { left: '52%', top: '70%', size: 116, color: 'rgba(201, 151, 63, .1)' },
+  { left: '66%', top: '16%', size: 80, color: 'rgba(155, 111, 232, .09)' },
+  { left: '78%', top: '52%', size: 128, color: 'rgba(220, 174, 95, .1)' },
+  { left: '90%', top: '22%', size: 66, color: 'rgba(138, 31, 43, .12)' },
+  { left: '12%', top: '80%', size: 54, color: 'rgba(201, 151, 63, .14)' },
+].map((b, i) => ({
+  left: b.left,
+  top: b.top,
+  width: b.size + 'px',
+  height: b.size + 'px',
+  background: `radial-gradient(circle, ${b.color} 0%, transparent 70%)`,
+  animationDuration: (12 + i * 2.4) + 's',
+  animationDelay: (-i * 1.9) + 's',
+}))
+
+// 鼠标视差（减弱动效时跳过）
+const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+function onHeroMove(e) {
+  if (reduceMotion) return
+  const el = e.currentTarget
+  const r = el.getBoundingClientRect()
+  el.style.setProperty('--mx', (((e.clientX - r.left) / r.width) * 2 - 1).toFixed(3))
+  el.style.setProperty('--my', (((e.clientY - r.top) / r.height) * 2 - 1).toFixed(3))
+}
 
 // 图片预览
 const previewImageUrl = ref(null)
@@ -785,304 +978,939 @@ async function onDelete(d) {
   }
 }
 
-onMounted(async () => {
+onMounted(() => {
   loadList()
   loadExamples()
-  try {
-    const lock = await aiAPI.getVendorLock()
-    vendorLockEnabled.value = !!lock?.enabled
-  } catch (_) {}
 })
 </script>
+
 
 <style scoped>
 .film-list {
   min-height: 100vh;
-  background: #08080d;
-  color: #e4e4e7;
+  background: #090808;
+  color: #e6e0d6;
   background-image:
-    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(99, 102, 241, 0.18) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 35% at 85% 55%, rgba(139, 92, 246, 0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 10% 80%, rgba(79, 70, 229, 0.08) 0%, transparent 60%);
+    radial-gradient(circle at 1px 1px, rgba(247, 243, 239, .04) 1px, transparent 0),
+    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(201, 151, 63,  0.09) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 88% 50%, rgba(220, 174, 95,  0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 8% 85%, rgba(138, 31, 43,  0.05) 0%, transparent 60%);
+  background-size: 26px 26px, auto, auto, auto;
 }
-.header {
-  background: rgba(12, 12, 18, 0.82);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(99, 102, 241, 0.18);
-  padding: 12px 24px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 1px 0 rgba(99, 102, 241, 0.08), 0 4px 24px rgba(0, 0, 0, 0.3);
-}
-.header-inner {
-  max-width: min(1400px, 96vw);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.logo {
-  margin: 0;
-  cursor: pointer;
+
+/* ===================== Hero · 放映厅首映 ===================== */
+.hero {
+  position: relative;
+  padding: 48px 24px 20px;
+  min-height: min(900px, 94vh);
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  line-height: 1;
+  justify-content: center;
+  gap: 22px;
+  overflow: hidden;
 }
-.logo-main {
-  font-size: 1.1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 50%, #f0abfc 100%);
+/* 暗角（影院氛围） */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(125% 95% at 50% 32%, transparent 58%, rgba(5, 4, 3, 0.55) 100%);
+  pointer-events: none;
+}
+
+/* —— 巨型背景字（景深层） —— */
+.hero-backdrop {
+  position: absolute;
+  inset: -6% 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-size: clamp(8rem, 22vw, 20rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  color: transparent;
+  background: linear-gradient(180deg, rgba(220, 174, 95, 0.05) 0%, rgba(220, 174, 95, 0.012) 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 1px rgba(220, 174, 95, 0.075);
+  user-select: none;
+  pointer-events: none;
+  transform: translate3d(calc(var(--mx, 0) * 22px), calc(var(--my, 0) * 12px), 0);
+  transition: transform 0.6s ease-out;
+}
+
+/* —— 散景光斑（景深层） —— */
+.bokeh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translate3d(calc(var(--mx, 0) * -26px), calc(var(--my, 0) * -14px), 0);
+  transition: transform 0.5s ease-out;
+}
+.bokeh span {
+  position: absolute;
+  border-radius: 50%;
+  animation: bokeh-drift ease-in-out infinite alternate;
+}
+@keyframes bokeh-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(28px, -22px, 0) scale(1.18); }
+}
+
+/* —— 中轴光柱（放映机主光） —— */
+.godray {
+  position: absolute;
+  top: -22%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 58vw;
+  height: 125%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(233, 211, 166, 0.09) 0%, rgba(233, 211, 166, 0.03) 50%, transparent 80%);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+  filter: blur(18px);
+}
+
+/* —— 放映光束（扫动） —— */
+.beam {
+  position: absolute;
+  top: -30%;
+  width: 46vw;
+  height: 150%;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(233, 211, 166, 0.12) 0%, rgba(233, 211, 166, 0.045) 45%, transparent 78%);
+  clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+  filter: blur(14px);
+  transform-origin: top center;
+}
+.beam--left {
+  left: -6%;
+  animation: beam-pan-l 11s ease-in-out infinite alternate;
+}
+.beam--right {
+  right: -6%;
+  animation: beam-pan-r 12.5s ease-in-out infinite alternate;
+}
+@keyframes beam-pan-l {
+  0% { transform: rotate(10deg); opacity: 0.9; }
+  50% { opacity: 0.5; }
+  100% { transform: rotate(18deg); opacity: 0.9; }
+}
+@keyframes beam-pan-r {
+  0% { transform: rotate(-18deg); opacity: 0.6; }
+  50% { opacity: 0.35; }
+  100% { transform: rotate(-10deg); opacity: 0.6; }
+}
+
+/* —— 光束中的尘埃 —— */
+.hero-dust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hero-dust span {
+  position: absolute;
+  top: 55%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(236, 220, 186, 0.5);
+  box-shadow: 0 0 6px rgba(233, 211, 166, 0.5);
+  animation: dust-rise linear infinite;
+  opacity: 0;
+}
+@keyframes dust-rise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  15% { opacity: 0.8; }
+  85% { opacity: 0.4; }
+  100% { transform: translateY(-150px) scale(1); opacity: 0; }
+}
+
+/* —— 红幕布（闭合 → 向两侧拉开收拢） —— */
+.curtain-reveal {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.reveal-half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* 完成态：收紧在两侧的幕条 */
+  width: 7%;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, transparent 22%, rgba(0, 0, 0, 0.3) 100%),
+    repeating-linear-gradient(90deg, #1e070c 0px, #4d101d 14px, #6b1a28 26px, #4d101d 38px, #1e070c 52px);
+  box-shadow: inset 0 0 44px rgba(0, 0, 0, 0.55);
+}
+/* 内沿深色接缝 */
+.reveal-half--left::before,
+.reveal-half--right::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.reveal-half--left::before { background: linear-gradient(90deg, transparent 62%, rgba(0, 0, 0, 0.38) 100%); }
+.reveal-half--right::before { background: linear-gradient(-90deg, transparent 62%, rgba(0, 0, 0, 0.38) 100%); }
+/* 底部金色流苏 */
+.reveal-half::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 7px;
+  height: 6px;
+  background: radial-gradient(circle at 5px 0, rgba(220, 174, 95, 0.75) 2.5px, transparent 3.5px) 0 0 / 10px 6px repeat-x;
+}
+.reveal-half--left {
+  left: 0;
+  border-right: 2px solid rgba(220, 174, 95, 0.42);
+  animation:
+    reveal-open-l 2.3s cubic-bezier(.72, 0, .22, 1) 0.45s both,
+    reveal-fabric-l 2.3s linear 0.45s both;
+}
+.reveal-half--right {
+  right: 0;
+  border-left: 2px solid rgba(220, 174, 95, 0.42);
+  animation:
+    reveal-open-r 2.3s cubic-bezier(.72, 0, .22, 1) 0.45s both,
+    reveal-fabric-r 2.3s linear 0.45s both;
+}
+@keyframes reveal-open-l {
+  0% { width: 53%; }
+  72% { width: 6.2%; }
+  100% { width: 7%; }
+}
+@keyframes reveal-open-r {
+  0% { width: 53%; }
+  72% { width: 6.2%; }
+  100% { width: 7%; }
+}
+/* 褶皱随拉动滑移（织物收拢感） */
+@keyframes reveal-fabric-l {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 0 0, 156px 0; }
+}
+@keyframes reveal-fabric-r {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 0 0, -156px 0; }
+}
+
+/* —— 宽银幕（四周灯泡，视差主体） —— */
+.screen {
+  position: relative;
+  z-index: 2;
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(18, 16, 15, 0.94) 0%, rgba(11, 10, 9, 0.97) 100%);
+  border: 1px solid rgba(220, 174, 95, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(201, 151, 63, 0.04),
+    0 0 56px rgba(201, 151, 63, 0.07),
+    0 30px 80px rgba(5, 4, 3, 0.65);
+  overflow: hidden;
+  transform: translate3d(calc(var(--mx, 0) * -10px), calc(var(--my, 0) * -7px), 0);
+  transition: transform 0.35s ease-out;
+  animation: screen-lightup 1.3s ease 1.3s both;
+}
+@keyframes screen-lightup {
+  from { opacity: 0; filter: brightness(0.25); }
+}
+
+/* 银幕内部微光 + 胶片颗粒 */
+.screen-body {
+  position: relative;
+  padding: 72px 56px 76px;
+  text-align: center;
+  background:
+    radial-gradient(90% 120% at 50% 0%, rgba(201, 151, 63, 0.06) 0%, transparent 55%);
+}
+.screen-body::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-jitter 1.2s steps(6) infinite;
+}
+@keyframes grain-jitter {
+  0% { background-position: 0 0; }
+  20% { background-position: -30px 10px; }
+  40% { background-position: 20px -25px; }
+  60% { background-position: -15px -10px; }
+  80% { background-position: 25px 20px; }
+  100% { background-position: 0 0; }
+}
+
+/* 放映机闪烁 */
+.projector-flicker {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background: radial-gradient(80% 60% at 50% 40%, rgba(255, 244, 214, 0.05), transparent 72%);
+  animation: flicker 3.8s steps(12) infinite;
+}
+@keyframes flicker {
+  0%, 100% { opacity: 0.5; }
+  8% { opacity: 0.95; }
+  16% { opacity: 0.4; }
+  30% { opacity: 0.85; }
+  44% { opacity: 0.55; }
+  58% { opacity: 1; }
+  72% { opacity: 0.45; }
+  86% { opacity: 0.8; }
+}
+
+/* —— 跑马灯泡（四周追逐） —— */
+.bulb-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 18px 0;
+}
+.bulb-row:last-child {
+  padding: 0 18px 10px;
+}
+.bulb {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f4e3bd, #dcae5f);
+  animation: bulb-chase 1.7s ease-in-out infinite;
+}
+@keyframes bulb-chase {
+  0%, 100% {
+    opacity: 0.28;
+    box-shadow: 0 0 3px rgba(224, 178, 100, 0.25);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 9px rgba(224, 178, 100, 0.85), 0 0 18px rgba(201, 151, 63, 0.4);
+  }
+}
+
+/* —— 银幕文案（逐行浮现） —— */
+.hero-eyebrow {
+  margin: 0 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  color: #dcae5f;
+  text-transform: uppercase;
+  animation: rise-in 0.7s var(--ease-out) 1.7s both;
+}
+.hero-eyebrow::before,
+.hero-eyebrow::after {
+  content: '';
+  width: 64px;
+  height: 1px;
+}
+.hero-eyebrow::before { background: linear-gradient(90deg, transparent, rgba(220, 174, 95, 0.55)); }
+.hero-eyebrow::after { background: linear-gradient(-90deg, transparent, rgba(220, 174, 95, 0.55)); }
+.eyebrow-star {
+  color: rgba(220, 174, 95, 0.65);
+  font-size: 0.7rem;
+  vertical-align: 1px;
+}
+.hero-title {
+  margin: 0 0 14px;
+  font-size: clamp(2.8rem, 6.5vw, 4.4rem);
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  line-height: 1.12;
+  background: linear-gradient(146deg, #f5e6c4 0.67%, #c9973f 99.57%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.35));
+  filter: drop-shadow(0 0 20px rgba(201, 151, 63, 0.22));
+  animation:
+    rise-in 0.8s var(--ease-out) 1.85s both,
+    title-glow 4.5s ease-in-out 3s infinite;
 }
-.logo-sub {
-  font-size: 0.68rem;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  color: #6d6d7a;
-  -webkit-text-fill-color: #6d6d7a;
-  filter: none;
+@keyframes title-glow {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(201, 151, 63, 0.2)); }
+  50% { filter: drop-shadow(0 0 30px rgba(201, 151, 63, 0.34)); }
 }
-.page-title {
-  color: #a1a1aa;
+.hero-billing {
+  margin: 2px 0 16px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.46em;
+  text-indent: 0.46em;
+  color: rgba(220, 174, 95, 0.55);
+  text-transform: uppercase;
+  animation: rise-in 0.7s var(--ease-out) 1.95s both;
+}
+.hero-credits {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: #8b8478;
+  animation: rise-in 0.7s var(--ease-out) 2.35s both;
+}
+.hero-credits i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(220, 174, 95, 0.5);
+}
+.hero-sub {
+  margin: 0 auto 28px;
+  font-size: 0.98rem;
+  color: #b3aca0;
+  max-width: 520px;
+  animation: rise-in 0.7s var(--ease-out) 2s both;
+}
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: rise-in 0.7s var(--ease-out) 2.15s both;
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(20px); }
+}
+.hero-btn-import {
+  --el-button-bg-color: rgba(201, 151, 63, 0.1);
+  --el-button-border-color: rgba(201, 151, 63, 0.32);
+  --el-button-text-color: #dcae5f;
+  --el-button-hover-bg-color: rgba(201, 151, 63, 0.2);
+  --el-button-hover-border-color: rgba(201, 151, 63, 0.5);
+  --el-button-hover-text-color: #ecc98f;
+}
+
+/* —— 银幕地面光晕（舞台反光） —— */
+.screen-reflection {
+  width: 72%;
+  max-width: 900px;
+  height: 64px;
+  margin: -6px auto 0;
+  background: radial-gradient(56% 100% at 50% 0%, rgba(201, 151, 63, 0.1) 0%, rgba(138, 31, 43, 0.04) 45%, transparent 78%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+/* —— 票根统计（末位入场） —— */
+.ticket-row {
+  position: relative;
+  max-width: 980px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  z-index: 2;
+  animation: rise-in 0.8s var(--ease-out) 2.4s both;
+}
+.ticket {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 210px;
+  padding: 16px 24px 16px 18px;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 0 0, rgba(201, 151, 63, 0.12) 0%, transparent 70%),
+    linear-gradient(135deg, #f7f2ec 0%, #efe6db 100%);
+  color: #4a3527;
+  box-shadow: 0 10px 30px rgba(5, 4, 3, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  position: relative;
+  transform: rotate(-0.6deg);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s;
+}
+.ticket:nth-child(2) { transform: rotate(0.7deg); }
+.ticket:nth-child(3) { transform: rotate(-0.4deg); }
+.ticket:hover {
+  transform: rotate(0deg) translateY(-3px);
+  box-shadow: 0 16px 40px rgba(5, 4, 3, 0.55), 0 0 0 1px rgba(201, 151, 63, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+/* 票根穿孔（左右半圆缺口 + 中缝虚线） */
+.ticket::before,
+.ticket::after {
+  content: '';
+  position: absolute;
+  right: 62px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #090808;
+}
+.ticket::before { top: -7px; }
+.ticket::after { bottom: -7px; }
+.ticket-num {
+  font-size: 1.9rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #8a1f2b;
+  font-variant-numeric: tabular-nums;
+}
+.ticket-info {
+  border-left: 2px dashed rgba(74, 53, 39, 0.3);
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ticket-info b {
   font-size: 0.95rem;
+  font-weight: 700;
+  color: #2c1b10;
 }
-.header-library {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: 20px;
-}
-.header-actions {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.ticket-info span {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  color: #9a6a4a;
+  text-transform: uppercase;
 }
 
-/* 资源库按钮 —— 靛紫调 */
-.btn-library {
-  --el-button-bg-color: rgba(99, 102, 241, 0.12);
-  --el-button-border-color: rgba(99, 102, 241, 0.35);
-  --el-button-text-color: #a5b4fc;
-  --el-button-hover-bg-color: rgba(99, 102, 241, 0.22);
-  --el-button-hover-border-color: rgba(99, 102, 241, 0.55);
-  --el-button-hover-text-color: #c7d2fe;
-  --el-button-active-bg-color: rgba(99, 102, 241, 0.3);
-  --el-button-active-border-color: rgba(99, 102, 241, 0.7);
-}
-html.light .btn-library {
-  --el-button-bg-color: rgba(79, 70, 229, 0.08);
-  --el-button-border-color: rgba(79, 70, 229, 0.3);
-  --el-button-text-color: #3730a3;
-  --el-button-hover-bg-color: rgba(79, 70, 229, 0.14);
-  --el-button-hover-border-color: rgba(79, 70, 229, 0.5);
-  --el-button-hover-text-color: #312e81;
-  --el-button-active-bg-color: rgba(79, 70, 229, 0.2);
-  --el-button-active-border-color: rgba(79, 70, 229, 0.65);
-}
-
-/* 主题切换按钮 */
-.btn-theme {
-  --el-button-bg-color: rgba(148, 163, 184, 0.1);
-  --el-button-border-color: rgba(148, 163, 184, 0.3);
-  --el-button-text-color: #94a3b8;
-  --el-button-hover-bg-color: rgba(148, 163, 184, 0.2);
-  --el-button-hover-border-color: rgba(148, 163, 184, 0.5);
-  --el-button-hover-text-color: #cbd5e1;
-  transition: all 0.2s;
-}
-html.light .btn-theme {
-  --el-button-bg-color: rgba(99, 102, 241, 0.08);
-  --el-button-border-color: rgba(99, 102, 241, 0.3);
-  --el-button-text-color: #6366f1;
-  --el-button-hover-bg-color: rgba(99, 102, 241, 0.15);
-  --el-button-hover-border-color: rgba(99, 102, 241, 0.5);
-  --el-button-hover-text-color: #4f46e5;
-}
-
-/* 微信我按钮 —— 绿调 */
-.btn-wechat {
-  --el-button-bg-color: rgba(34, 197, 94, 0.1);
-  --el-button-border-color: rgba(34, 197, 94, 0.3);
-  --el-button-text-color: #22c55e;
-  --el-button-hover-bg-color: rgba(34, 197, 94, 0.2);
-  --el-button-hover-border-color: rgba(34, 197, 94, 0.5);
-  --el-button-hover-text-color: #16a34a;
-  transition: all 0.2s;
-}
-html.light .btn-wechat {
-  --el-button-bg-color: rgba(21, 128, 61, 0.08);
-  --el-button-border-color: rgba(21, 128, 61, 0.3);
-  --el-button-text-color: #166534;
-  --el-button-hover-bg-color: rgba(21, 128, 61, 0.14);
-  --el-button-hover-border-color: rgba(21, 128, 61, 0.5);
-  --el-button-hover-text-color: #14532d;
-}
-
-/* AI配置按钮 —— 琥珀调 */
-.btn-settings {
-  --el-button-bg-color: rgba(234, 179, 8, 0.1);
-  --el-button-border-color: rgba(234, 179, 8, 0.32);
-  --el-button-text-color: #fcd34d;
-  --el-button-hover-bg-color: rgba(234, 179, 8, 0.2);
-  --el-button-hover-border-color: rgba(234, 179, 8, 0.5);
-  --el-button-hover-text-color: #fde68a;
-  --el-button-active-bg-color: rgba(234, 179, 8, 0.28);
-  --el-button-active-border-color: rgba(234, 179, 8, 0.65);
-}
-html.light .btn-settings {
-  --el-button-bg-color: rgba(180, 83, 9, 0.07);
-  --el-button-border-color: rgba(180, 83, 9, 0.28);
-  --el-button-text-color: #92400e;
-  --el-button-hover-bg-color: rgba(180, 83, 9, 0.12);
-  --el-button-hover-border-color: rgba(180, 83, 9, 0.45);
-  --el-button-hover-text-color: #78350f;
-  --el-button-active-bg-color: rgba(180, 83, 9, 0.18);
-  --el-button-active-border-color: rgba(180, 83, 9, 0.6);
-}
-
-/* 导入按钮 —— 亮色模式下提升可读性 */
-html.light .btn-import {
-  --el-button-text-color: #374151;
-  --el-button-border-color: #d1d5db;
-  --el-button-hover-text-color: #1f2937;
-  --el-button-hover-border-color: #9ca3af;
-}
-
+/* ===================== 工具行 ===================== */
 .main {
   max-width: min(1400px, 96vw);
   margin: 0 auto;
-  padding: 24px 16px 48px;
+  padding: 28px 16px 56px;
 }
+
+/* 胶片画廊（风格卷轴，无限滚动） */
+.reel-gallery {
+  position: relative;
+  margin-bottom: 22px;
+  padding: 21px 0;
+  background: #12100e;
+  border-top: 1px solid rgba(240, 234, 226, 0.07);
+  border-bottom: 1px solid rgba(240, 234, 226, 0.07);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+/* 上下齿孔带 */
+.reel-gallery::before,
+.reel-gallery::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: radial-gradient(circle at 7px 6px, rgba(9, 8, 8, 0.95) 2.6px, transparent 3.4px) 0 0 / 14px 12px repeat-x;
+  z-index: 1;
+}
+.reel-gallery::before { top: 4px; }
+.reel-gallery::after { bottom: 4px; }
+.reel-track {
+  display: flex;
+  width: max-content;
+  animation: reel-scroll 48s linear infinite;
+}
+.reel-gallery:hover .reel-track { animation-play-state: paused; }
+@keyframes reel-scroll { to { transform: translateX(-50%); } }
+.reel-frame {
+  position: relative;
+  width: 150px;
+  aspect-ratio: 16 / 9;
+  margin-right: 10px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(240, 234, 226, 0.1);
+  flex-shrink: 0;
+}
+.reel-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.85) contrast(0.96);
+  transition: filter 0.3s, transform 0.3s var(--ease-out, ease);
+}
+.reel-frame:hover img { filter: saturate(1.08); transform: scale(1.06); }
+.reel-frame-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 6px 3px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: #f5efe5;
+  background: linear-gradient(180deg, transparent, rgba(5, 4, 3, 0.85));
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===================== 正在上映 · 排片行 ===================== */
+.now-showing {
+  margin-bottom: 22px;
+}
+.ns-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+}
+.ns-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+}
+.ns-eyebrow {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: rgba(220, 174, 95, 0.75);
+  text-transform: uppercase;
+}
+.ns-title {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  background: linear-gradient(146deg, #f5e6c4 0%, #c9973f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.ns-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 99px;
+  background: rgba(201, 151, 63, 0.14);
+  color: #ecc98f;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  align-self: center;
+}
+/* 分隔金线（末端菱形） */
+.ns-rule {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(220, 174, 95, 0.5), rgba(220, 174, 95, 0.12) 70%, transparent);
+  position: relative;
+}
+.ns-rule i {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  transform: translateY(-50%) rotate(45deg);
+  background: linear-gradient(135deg, #ecc98f, #c9973f);
+  border-radius: 1.5px;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.toolbar-search {
+  width: 240px;
+}
+
+/* 资源库按钮 —— 影院金 */
+.btn-library {
+  --el-button-bg-color: rgba(201, 151, 63, 0.12);
+  --el-button-border-color: rgba(201, 151, 63, 0.35);
+  --el-button-text-color: #dcae5f;
+  --el-button-hover-bg-color: rgba(201, 151, 63, 0.22);
+  --el-button-hover-border-color: rgba(201, 151, 63, 0.55);
+  --el-button-hover-text-color: #ecc98f;
+  --el-button-active-bg-color: rgba(201, 151, 63, 0.3);
+  --el-button-active-border-color: rgba(201, 151, 63, 0.7);
+}
+html.light .btn-library {
+  --el-button-bg-color: rgba(201, 151, 63, 0.06);
+  --el-button-border-color: rgba(201, 151, 63, 0.3);
+  --el-button-text-color: #8c6425;
+  --el-button-hover-bg-color: rgba(201, 151, 63, 0.12);
+  --el-button-hover-border-color: rgba(201, 151, 63, 0.5);
+  --el-button-hover-text-color: #6f4f1c;
+  --el-button-active-bg-color: rgba(201, 151, 63, 0.18);
+  --el-button-active-border-color: rgba(201, 151, 63, 0.65);
+}
+
+/* ===================== 海报墙 ===================== */
 .projects-wrap {
   min-height: 200px;
 }
+.poster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+/* 海报卡 */
+.poster-card {
+  position: relative;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.24s var(--ease-out, ease), box-shadow 0.24s;
+}
+.poster-card:focus-visible {
+  outline: 2px solid rgba(220, 174, 95, 0.7);
+  outline-offset: 2px;
+}
+.poster-card:hover {
+  transform: translateY(-4px);
+}
+.poster-media {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(220, 174, 95, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(240, 234, 226, 0.03), 0 10px 30px rgba(5, 4, 3, 0.4);
+  transition: border-color 0.24s, box-shadow 0.24s;
+}
+.poster-card:hover .poster-media {
+  border-color: rgba(220, 174, 95, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(240, 234, 226, 0.04), 0 18px 44px rgba(5, 4, 3, 0.5), 0 0 26px rgba(201, 151, 63, 0.12);
+}
+/* 封面图 */
+.poster-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.95);
+  transition: transform 0.5s var(--ease-out, ease), filter 0.4s;
+}
+.poster-card:hover .poster-img {
+  transform: scale(1.05);
+  filter: saturate(1.05);
+}
+/* 无图回退：字牌 */
+.poster-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4.6rem;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(146deg, #f5e6c4 0.67%, #c9973f 99.57%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.85;
+  user-select: none;
+  filter: drop-shadow(0 4px 18px rgba(201, 151, 63, 0.22));
+}
+/* 底部信息（叠在画面上） */
+.poster-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 34px 14px 12px;
+  background: linear-gradient(180deg, transparent, rgba(5, 4, 3, 0.55) 42%, rgba(5, 4, 3, 0.88));
+}
+.poster-title {
+  margin: 0 0 3px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f5efe5;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+.poster-sub {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(236, 201, 143, 0.85);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* 状态角标 */
+.poster-status {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 1px 7px;
+  margin-bottom: 6px;
+  border-radius: 3px;
+  color: #ecc98f;
+  background: rgba(5, 4, 3, 0.55);
+  border: 1px solid rgba(220, 174, 95, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.poster-status--published {
+  color: #6ee7b7;
+  border-color: rgba(76, 175, 80, 0.45);
+}
+.poster-status--generating {
+  color: #fcd34d;
+  border-color: rgba(234, 179, 8, 0.45);
+}
+/* hover 操作 */
+.poster-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s var(--ease-out, ease), transform 0.2s var(--ease-out, ease);
+}
+.poster-card:hover .poster-actions,
+.poster-card:focus-within .poster-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+.poster-actions .el-button {
+  --el-button-size: 28px;
+  padding: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* 新建 / 导入（电影引片卡） */
+.poster-card--new {
+  min-height: 100%;
+  border-radius: 14px;
+  border: 1.5px dashed rgba(220, 174, 95, 0.35);
+  background: linear-gradient(160deg, rgba(201, 151, 63, 0.05), rgba(138, 31, 43, 0.04));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px;
+  transition: border-color 0.22s, background 0.22s, transform 0.24s var(--ease-out, ease), box-shadow 0.22s;
+}
+.poster-card--new:hover {
+  border-color: rgba(220, 174, 95, 0.65);
+  background: linear-gradient(160deg, rgba(201, 151, 63, 0.1), rgba(138, 31, 43, 0.07));
+  transform: translateY(-3px);
+  box-shadow: 0 12px 34px rgba(5, 4, 3, 0.4);
+}
+.new-card-text {
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #dcae5f;
+}
+
+/* 电影引片圆环 */
+.leader-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2px solid rgba(220, 174, 95, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  color: #ecc98f;
+  transition: transform 0.22s var(--ease-out, ease), border-color 0.22s;
+}
+.leader-circle .el-icon { font-size: 22px; color: #ecc98f; }
+.leader-circle::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(220, 174, 95, 0.3);
+}
+.leader-circle::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  background:
+    linear-gradient(#c9973f, #c9973f) center / 100% 1px no-repeat,
+    linear-gradient(#c9973f, #c9973f) center / 1px 100% no-repeat;
+  opacity: 0.2;
+}
+.poster-card--new:hover .leader-circle {
+  transform: scale(1.08);
+  border-color: rgba(220, 174, 95, 0.8);
+}
+.leader-circle.is-loading .el-icon.is-turning {
+  animation: leader-spin 1s linear infinite;
+}
+@keyframes leader-spin { to { transform: rotate(360deg); } }
+
+/* 空态 */
 .empty {
   text-align: center;
   padding: 48px 24px;
 }
+.empty-illust {
+  width: 120px;
+  height: 100px;
+  display: block;
+  margin: 0 auto 16px;
+}
 .empty-title {
-  font-size: 1.1rem;
-  color: #e4e4e7;
+  font-size: 1.05rem;
+  color: #e6e0d6;
   margin: 0 0 8px;
 }
 .empty-desc {
-  color: #71717a;
+  color: #8b8478;
   font-size: 0.9rem;
-  margin: 0 0 20px;
-}
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 18px;
-}
-.project-card {
-  position: relative;
-  background: rgba(24, 24, 30, 0.75);
-  border: 1px solid rgba(63, 63, 70, 0.6);
-  border-radius: 14px;
-  padding: 20px;
-  cursor: pointer;
-  transition: border-color 0.25s, background 0.25s, transform 0.25s, box-shadow 0.25s;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  overflow: hidden;
-}
-.project-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.04) 0%, transparent 60%);
-  pointer-events: none;
-}
-.project-card:hover {
-  border-color: rgba(99, 102, 241, 0.55);
-  background: rgba(28, 28, 36, 0.9);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15), 0 0 0 1px rgba(99, 102, 241, 0.1), 0 2px 8px rgba(0, 0, 0, 0.4);
+  margin: 0;
 }
 
-/* 操作卡片 */
-.action-card {
-  cursor: default;
-  border-style: dashed;
-  border-color: rgba(99, 102, 241, 0.4);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(139, 92, 246, 0.04) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: inset 0 0 40px rgba(99, 102, 241, 0.04);
-}
-.action-card:hover {
-  border-color: rgba(99, 102, 241, 0.65);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.07) 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.12), inset 0 0 40px rgba(99, 102, 241, 0.06);
-}
-.action-card::before {
-  display: none;
-}
-.action-card-inner {
-  width: 100%;
+/* 新手试映 */
+.example-section {
+  margin-top: 28px;
+  padding: 18px 20px;
+  border: 1px dashed rgba(240, 234, 226, 0.12);
+  border-radius: 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-}
-.action-card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #a5b4fc;
-  margin: 0;
-}
-.action-card-buttons {
-  display: flex;
   gap: 12px;
-  width: 100%;
-  justify-content: center;
-}
-.action-btn {
-  min-width: 150px;
-}
-.action-btn-new {
-  --el-button-bg-color: var(--el-color-primary);
-}
-.action-btn-import {
-  --el-button-bg-color: rgba(99, 102, 241, 0.12);
-  --el-button-border-color: rgba(99, 102, 241, 0.35);
-  --el-button-text-color: #a5b4fc;
-  --el-button-hover-bg-color: rgba(99, 102, 241, 0.22);
-  --el-button-hover-border-color: rgba(99, 102, 241, 0.55);
-  --el-button-hover-text-color: #c7d2fe;
-}
-.action-card-example {
-  width: 100%;
-  padding-top: 8px;
-  border-top: 1px solid rgba(99, 102, 241, 0.15);
 }
 .example-hint {
   display: flex;
   align-items: center;
   gap: 6px;
   justify-content: center;
-  margin-bottom: 8px;
 }
 .example-hint-icon {
-  color: #a5b4fc;
+  color: #dcae5f;
   font-size: 15px;
 }
 .example-hint-text {
   font-size: 0.8rem;
-  color: #71717a;
+  color: #8b8478;
 }
 .example-list {
   display: flex;
@@ -1098,117 +1926,14 @@ html.light .btn-import {
   --el-button-hover-border-color: rgba(34, 197, 94, 0.5);
   --el-button-hover-text-color: #22c55e;
 }
-.project-card-body {
-  padding-right: 56px;
-}
-.project-title {
-  font-size: 1.05rem;
-  margin: 0 0 8px;
-  color: #fafafa;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.project-desc {
-  font-size: 0.875rem;
-  color: #a1a1aa;
-  margin: 0 0 12px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.project-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0 0 10px;
-}
-.badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.72rem;
-  padding: 2px 8px;
-  border-radius: 99px;
-  font-weight: 500;
-  line-height: 1.5;
-  white-space: nowrap;
-}
-.badge-status--draft {
-  background: rgba(113, 113, 122, 0.15);
-  color: #a1a1aa;
-  border: 1px solid rgba(113, 113, 122, 0.3);
-}
-.badge-status--published {
-  background: rgba(34, 197, 94, 0.12);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.3);
-}
-.badge-status--generating {
-  background: rgba(234, 179, 8, 0.12);
-  color: #fcd34d;
-  border: 1px solid rgba(234, 179, 8, 0.3);
-}
-.badge-status--archived {
-  background: rgba(99, 102, 241, 0.1);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.25);
-}
-.badge-episodes {
-  background: rgba(14, 165, 233, 0.12);
-  color: #38bdf8;
-  border: 1px solid rgba(14, 165, 233, 0.28);
-}
-.badge-storyboards {
-  background: rgba(20, 184, 166, 0.12);
-  color: #2dd4bf;
-  border: 1px solid rgba(20, 184, 166, 0.28);
-}
-.badge-ratio {
-  background: rgba(251, 146, 60, 0.1);
-  color: #fb923c;
-  border: 1px solid rgba(251, 146, 60, 0.25);
-  font-family: monospace;
-}
-.badge-style {
-  background: rgba(168, 85, 247, 0.1);
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.25);
-}
-.badge-genre {
-  background: rgba(249, 115, 22, 0.1);
-  color: #fb923c;
-  border: 1px solid rgba(249, 115, 22, 0.25);
-}
-.project-meta {
-  font-size: 0.75rem;
-  color: #71717a;
-  margin: 0;
-}
-.project-card-actions {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 6px;
-}
-.project-card-actions .el-button {
-  --el-button-size: 28px;
-  padding: 0;
-}
-.project-card-actions .el-button .el-icon {
-  font-size: 14px;
-}
 
-/* 公共库弹窗 */
+/* ===================== 公共库弹窗 ===================== */
 :global(.library-dialog .el-dialog__body) { padding-top: 8px; }
 
-/* 编辑弹框内图片区 */
 .lib-img-editor { display: flex; align-items: center; gap: 14px; }
-.lib-img-thumb { width: 88px; height: 88px; border-radius: 8px; overflow: hidden; cursor: zoom-in; background: var(--bg-inner, #1c1c1e); border: 1px solid var(--border-color, #27272a); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.lib-img-thumb { width: 88px; height: 88px; border-radius: 8px; overflow: hidden; cursor: zoom-in; background: var(--bg-inner, #1b1917); border: 1px solid var(--border-color, #2b2825); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .lib-img-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.lib-img-empty { color: var(--text-faint, #52525b); font-size: 26px; }
+.lib-img-empty { color: var(--text-faint, #6b665e); font-size: 26px; }
 .lib-img-btns { display: flex; flex-direction: column; gap: 8px; }
 .library-toolbar { margin-bottom: 12px; }
 .library-list {
@@ -1223,8 +1948,8 @@ html.light .btn-import {
   display: flex;
   gap: 12px;
   padding: 10px;
-  background: #1c1c1e;
-  border: 1px solid #27272a;
+  background: #1b1917;
+  border: 1px solid #2b2825;
   border-radius: 8px;
 }
 .library-item-cover {
@@ -1233,91 +1958,144 @@ html.light .btn-import {
   flex-shrink: 0;
   border-radius: 6px;
   overflow: hidden;
-  background: #27272a;
+  background: #2b2825;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 .library-item-cover img { width: 100%; height: 100%; object-fit: cover; }
-.library-item-placeholder { font-size: 0.8rem; color: #71717a; }
+.library-item-placeholder { font-size: 0.8rem; color: #8b8478; }
 .library-item-info { flex: 1; min-width: 0; }
-.library-item-name { font-weight: 500; margin-bottom: 4px; color: #fafafa; }
-.library-item-desc { font-size: 0.85rem; color: #a1a1aa; margin-bottom: 8px; }
+.library-item-name { font-weight: 500; margin-bottom: 4px; color: #f5efe5; }
+.library-item-desc { font-size: 0.85rem; color: #b3aca0; margin-bottom: 8px; }
 .library-item-actions { display: flex; gap: 8px; }
-.library-empty { text-align: center; color: #71717a; padding: 40px 20px; }
+.library-empty { text-align: center; color: #8b8478; padding: 40px 20px; }
 .library-pagination { margin-top: 12px; display: flex; justify-content: center; }
 
-/* ===== 亮色模式适配 ===== */
+/* ===================== 亮色模式适配 ===================== */
 html.light .film-list {
-  background: #f5f3ff;
-  color: #1e1b4b;
+  background: #f6f3ef;
+  color: #2c1b10;
   background-image:
-    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(99, 102, 241, 0.1) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 35% at 85% 55%, rgba(139, 92, 246, 0.06) 0%, transparent 60%);
+    radial-gradient(circle at 1px 1px, rgba(43, 35, 24, 0.045) 1px, transparent 0),
+    radial-gradient(ellipse 70% 45% at 50% -10%, rgba(201, 151, 63,  0.09) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 88% 50%, rgba(220, 174, 95,  0.05) 0%, transparent 60%);
+  background-size: 26px 26px, auto, auto;
 }
-html.light .header {
-  background: rgba(248, 246, 255, 0.88);
-  border-bottom-color: rgba(99, 102, 241, 0.2);
-  box-shadow: 0 1px 0 rgba(99, 102, 241, 0.1), 0 4px 16px rgba(99, 102, 241, 0.06);
+html.light .hero-eyebrow { color: #8c6425; }
+html.light .eyebrow-star { color: rgba(140, 100, 37,  0.55); }
+html.light .hero-title { filter: none; animation: none; }
+html.light .hero-sub { color: #6b665e; }
+html.light .hero::after {
+  background: radial-gradient(120% 90% at 50% 30%, transparent 60%, rgba(43, 35, 24, 0.12) 100%);
 }
-html.light .logo-main {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.2));
+html.light .hero-btn-import {
+  --el-button-bg-color: rgba(201, 151, 63,  0.06);
+  --el-button-border-color: rgba(201, 151, 63,  0.3);
+  --el-button-text-color: #8c6425;
+  --el-button-hover-bg-color: rgba(201, 151, 63,  0.12);
+  --el-button-hover-border-color: rgba(201, 151, 63,  0.5);
+  --el-button-hover-text-color: #7a5a1f;
 }
-html.light .logo-sub {
-  color: #9ca3af;
-  -webkit-text-fill-color: #9ca3af;
+/* 银幕（亮色：米白幕布） */
+html.light .screen {
+  background: linear-gradient(180deg, #ffffff 0%, #f7f2ec 100%);
+  border-color: rgba(220, 174, 95, 0.3);
+  box-shadow: 0 0 0 1px rgba(201, 151, 63, 0.06), 0 0 56px rgba(201, 151, 63, 0.07), 0 30px 70px rgba(43, 35, 24, 0.12);
+}
+html.light .screen-body {
+  background: radial-gradient(90% 120% at 50% 0%, rgba(201, 151, 63, 0.05) 0%, transparent 55%);
+}
+html.light .screen-body::after { opacity: 0.35; }
+html.light .hero-backdrop { -webkit-text-stroke-color: rgba(140, 100, 37, 0.09); }
+html.light .bokeh { opacity: 0.6; }
+/* 光束与幕布（亮色弱化） */
+html.light .beam { opacity: 0.45; }
+html.light .reveal-half { opacity: 0.9; }
+/* 票根（亮色：保持纸感，穿孔颜色跟随底色） */
+html.light .ticket::before,
+html.light .ticket::after { background: #f6f3ef; }
+html.light .ticket-row { margin-top: 18px; }
+/* 胶片分隔带（亮色） */
+html.light .reel-gallery {
+  background: #efe8e0;
+  border-color: #e0d7cb;
+}
+html.light .reel-gallery::before,
+html.light .reel-gallery::after {
+  background-image: radial-gradient(circle at 7px 6px, rgba(120, 106, 88, 0.4) 2.6px, transparent 3.4px);
+}
+html.light .reel-frame { border-color: #d5cdc0; }
+html.light .reel-frame-label { color: #2c1b10; background: linear-gradient(180deg, transparent, rgba(246, 243, 239, 0.92)); }
+html.light .leader-circle .el-icon { color: #8c6425; }
+html.light .frame-no { color: rgba(140, 100, 37, 0.8); }
+html.light .marquee {
+  background: linear-gradient(180deg, #ffffff 0%, #f9f5ef 100%);
+  border-color: rgba(201, 151, 63, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(43, 35, 24, 0.03), 0 16px 40px rgba(43, 35, 24, 0.1);
+}
+html.light .marquee-bar {
+  background: radial-gradient(90% 140% at 50% 0%, rgba(201, 151, 63, 0.05), transparent 62%);
+  border-block-color: rgba(201, 151, 63, 0.2);
+}
+html.light .marquee-title-text { filter: none; }
+html.light .ticket-tear::before,
+html.light .ticket-tear::after { background: #fdfaf6; box-shadow: inset 0 1px 2px rgba(43, 35, 24, 0.15); }
+html.light .project-card-body { background: linear-gradient(180deg, rgba(246, 243, 239, 0.6), transparent 60%); }
+html.light .toolbar-title-sub { color: #a39c91; }
+html.light .toolbar-count {
+  background: rgba(201, 151, 63,  0.1);
+  color: #8c6425;
 }
 html.light .project-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(199, 210, 254, 0.8);
-  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.06), 0 2px 12px rgba(0, 0, 0, 0.04);
-  backdrop-filter: none;
-}
-html.light .project-card::before {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, transparent 60%);
+  background: #ffffff;
+  border-color: #e5ded4;
+  box-shadow: 0 1px 4px rgba(43, 35, 24, 0.05), 0 2px 12px rgba(43, 35, 24, 0.04);
 }
 html.light .project-card:hover {
-  border-color: rgba(99, 102, 241, 0.5);
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 12px 36px rgba(99, 102, 241, 0.12), 0 0 0 1px rgba(99, 102, 241, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-color: rgba(201, 151, 63,  0.5);
+  background: #ffffff;
+  box-shadow: 0 12px 36px rgba(201, 151, 63,  0.12), 0 2px 8px rgba(43, 35, 24, 0.06);
 }
-html.light .action-card {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(139, 92, 246, 0.04) 100%);
-  border-color: rgba(99, 102, 241, 0.35);
+html.light .project-cover { border-bottom-color: #ece6de; }
+html.light .project-title { color: #1a1715; }
+html.light .project-desc { color: #6b665e; }
+html.light .project-meta { color: #7d766c; }
+html.light .new-card {
+  background: linear-gradient(135deg, rgba(201, 151, 63,  0.05) 0%, rgba(220, 174, 95,  0.03) 100%);
+  border-color: rgba(201, 151, 63,  0.32);
 }
-html.light .action-card:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.07) 100%);
-  border-color: rgba(99, 102, 241, 0.55);
+html.light .new-card:hover {
+  background: linear-gradient(135deg, rgba(201, 151, 63,  0.09) 0%, rgba(220, 174, 95,  0.06) 100%);
+  border-color: rgba(201, 151, 63,  0.5);
 }
-html.light .action-card-title { color: #4f46e5; }
-html.light .project-title { color: #1e1b4b; }
-html.light .project-desc { color: #4b5563; }
-html.light .project-meta { color: #6b7280; }
-html.light .example-hint-text { color: #6b7280; }
+html.light .leader-circle { border-color: rgba(140, 100, 37, 0.5); color: #8c6425; }
+html.light .new-card-text { color: #8c6425; }
+html.light .example-section { border-color: #d5cdc0; }
+html.light .example-hint-icon { color: #ab7c30; }
+html.light .example-hint-text { color: #7d766c; }
+html.light .empty-title { color: #2c1b10; }
+html.light .empty-desc { color: #7d766c; }
 html.light .library-item {
-  background: #faf9ff;
-  border-color: #e5e7eb;
+  background: #fdfaf6;
+  border-color: #e7e2da;
 }
-html.light .library-item-name { color: #1e1b4b; }
-html.light .library-item-desc { color: #4b5563; }
-html.light .library-empty { color: #6b7280; }
+html.light .library-item-name { color: #2c1b10; }
+html.light .library-item-desc { color: #6b665e; }
+html.light .library-empty { color: #7d766c; }
 html.light .lib-img-thumb {
-  background: #f3f4f6;
-  border-color: #e5e7eb;
+  background: #f3efe9;
+  border-color: #e7e2da;
 }
-html.light .lib-img-empty { color: #9ca3af; }
+html.light .lib-img-empty { color: #a8a29a; }
 html.light .badge-status--draft {
-  background: rgba(107, 114, 128, 0.1);
-  color: #4b5563;
-  border-color: rgba(107, 114, 128, 0.25);
+  background: rgba(125, 118, 108, 0.12);
+  color: #6b665e;
+  border-color: rgba(125, 118, 108, 0.3);
 }
 
-/* ===== 图片放大预览 ===== */
+/* ===================== 图片放大预览 ===================== */
 .image-preview-overlay {
   position: fixed;
   inset: 0;
@@ -1333,5 +2111,67 @@ html.light .badge-status--draft {
   max-height: 90vh;
   border-radius: 8px;
   object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .hero { padding-top: 32px; min-height: 0; }
+  .hero-backdrop { font-size: clamp(4rem, 22vw, 8rem); }
+  .hero-dust span:nth-child(n+8) { display: none; }
+  .bokeh span:nth-child(n+6) { display: none; }
+  .screen-body { padding: 44px 20px 48px; }
+  .hero-billing { font-size: 0.62rem; letter-spacing: 0.3em; text-indent: 0.3em; }
+  .hero-credits { gap: 8px; font-size: 0.66rem; }
+  .hero-eyebrow::before,
+  .hero-eyebrow::after { width: 28px; }
+  .screen-reflection { height: 36px; }
+  .bulb-row { padding: 8px 10px 0; }
+  .bulb-row:last-child { padding: 0 10px 8px; }
+  .bulb-row .bulb:nth-child(n+13) { display: none; }
+  .ticket-row { gap: 10px; }
+  .ticket { min-width: 150px; padding: 10px 14px 10px 12px; gap: 10px; }
+  .ticket-num { font-size: 1.3rem; }
+  .marquee-bar { padding: 8px 12px; }
+  .marquee-bulbs .bulb:nth-child(n+15) { display: none; }
+  .marquee-title-text { font-size: 1.2rem; }
+  .project-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; }
+  .cover-glyph { font-size: 3.6rem; }
+  .toolbar-search { width: 100%; flex: 1; }
+  .toolbar-actions { width: 100%; }
+  .reel-frame { width: 118px; margin-right: 8px; }
+  .reel-gallery { padding: 17px 0; }
+}
+
+/* 动效减弱：停用开场序列与循环光效 */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-half--left,
+  .reveal-half--right,
+  .screen,
+  .hero-eyebrow,
+  .hero-billing,
+  .hero-credits,
+  .hero-title,
+  .hero-sub,
+  .hero-actions,
+  .ticket-row,
+  .beam--left,
+  .beam--right,
+  .hero-dust span,
+  .bulb,
+  .screen-body::after,
+  .projector-flicker,
+  .reel-track,
+  .reel-icon,
+  .leader-circle .el-icon.is-turning,
+  .bokeh span {
+    animation: none !important;
+  }
+  .hero-dust span { opacity: 0.4; }
+  .projector-flicker { opacity: 0.4; }
+  .screen,
+  .hero-backdrop,
+  .bokeh { transform: none; transition: none; }
+  .project-cover::before {
+    transition: none;
+  }
 }
 </style>

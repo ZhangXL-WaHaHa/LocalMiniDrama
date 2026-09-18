@@ -25,7 +25,7 @@ const router = createRouter({
       path: '/film/:id/canvas',
       name: 'film-canvas',
       component: () => import('@/views/DramaCanvas.vue'),
-      meta: { title: '画布模式' }
+      meta: { title: '画布模式', bare: true }
     },
     {
       path: '/ai-config',

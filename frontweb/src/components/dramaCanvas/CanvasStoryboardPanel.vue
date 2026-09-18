@@ -416,7 +416,7 @@ async function runStep(step) {
   width: min(560px, 94vw);
   padding: 10px 14px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(129, 140, 248, 0.45);
+  border: 1px solid rgba(220, 174, 95,   0.45);
   background: rgba(15, 15, 18, 0.97);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
@@ -427,7 +427,7 @@ async function runStep(step) {
   margin-bottom: 8px;
   font-size: 12px;
   font-weight: 700;
-  color: #c7d2fe;
+  color: #f0d6a6;
 }
 .head-actions {
   display: flex;
@@ -446,7 +446,7 @@ async function runStep(step) {
   margin-bottom: 6px;
 }
 .compact-form :deep(.el-form-item__label) {
-  color: #71717a;
+  color: #8b8478;
   font-size: 11px;
 }
 .compact-form :deep(.el-input__wrapper),
@@ -491,7 +491,7 @@ async function runStep(step) {
   gap: 8px;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(63, 63, 70, 0.8);
+  border-top: 1px solid rgba(74, 69, 63,  0.8);
 }
 .panel-actions :deep(.el-button) {
   margin: 0;

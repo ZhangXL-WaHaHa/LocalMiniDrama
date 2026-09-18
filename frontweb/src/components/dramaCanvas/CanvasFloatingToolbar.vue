@@ -30,15 +30,15 @@ function create(type) {
   gap: 6px;
   padding: 8px 12px;
   border-radius: 10px;
-  border: 1px solid #3f3f46;
-  background: rgba(24, 24, 27, 0.94);
+  border: 1px solid #4a453f;
+  background: rgba(23, 21, 19,   0.94);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   flex-wrap: wrap;
   max-width: calc(100% - 24px);
 }
 .toolbar-label {
   font-size: 11px;
-  color: #71717a;
+  color: #8b8478;
   margin-right: 4px;
   white-space: nowrap;
 }

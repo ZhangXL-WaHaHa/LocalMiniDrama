@@ -118,7 +118,7 @@ import { ArrowDown, CircleClose, Search } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { CUSTOM_STYLE_VALUE, getStyleLabel } from '@/constants/styleOptions'
 
-const CUSTOM_SWATCH = 'linear-gradient(135deg,#5b8def,#2dd4bf)'
+const CUSTOM_SWATCH = 'linear-gradient(135deg,#f6c15f,#c9973f)'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -165,11 +165,11 @@ const filteredGroups = computed(() => {
 
 function thumbStyle(opt) {
   if (opt.thumb) return {}
-  return { background: opt.color || 'linear-gradient(135deg,#667eea,#764ba2)' }
+  return { background: opt.color || 'linear-gradient(135deg,#ecc98f,#c9973f)' }
 }
 
 function swatchStyle(opt) {
-  return { background: opt?.color || 'linear-gradient(135deg,#667eea,#764ba2)' }
+  return { background: opt?.color || 'linear-gradient(135deg,#ecc98f,#c9973f)' }
 }
 
 function openCustomEditor() {

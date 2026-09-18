@@ -12,7 +12,7 @@ defineProps({
 .canvas-label-node {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-muted, #a1a1aa);
+  color: var(--text-muted, #b3aca0);
   letter-spacing: 0.02em;
   user-select: none;
   pointer-events: none;

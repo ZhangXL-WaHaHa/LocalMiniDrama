@@ -234,7 +234,7 @@
           @selection-change="onSelectionChange"
         >
           <CanvasFlowAligner />
-          <Background pattern-color="#3f3f46" :gap="20" />
+          <Background pattern-color="#4a453f" :gap="20" />
           <Controls />
           <MiniMap pannable zoomable />
         </VueFlow>
@@ -917,15 +917,15 @@ onBeforeUnmount(() => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-page, #0f0f12);
-  color: var(--text-primary, #e4e4e7);
+  background: var(--bg-page, #100f0e);
+  color: var(--text-primary, #e6e0d6);
   overflow: hidden;
 }
 
 .header {
   flex-shrink: 0;
-  border-bottom: 1px solid var(--border-color, #27272a);
-  background: var(--bg-card, #18181b);
+  border-bottom: 1px solid var(--border-color, #2b2825);
+  background: var(--bg-card, #171513);
 }
 
 .header-inner {
@@ -946,7 +946,7 @@ onBeforeUnmount(() => {
 
 .wf-hint {
   font-size: 12px;
-  color: var(--text-subtle, #71717a);
+  color: var(--text-subtle, #8b8478);
 }
 
 .wf-steps {
@@ -970,7 +970,7 @@ onBeforeUnmount(() => {
   gap: 8px;
   padding: 0 20px 10px;
   flex-wrap: wrap;
-  border-top: 1px solid rgba(63, 63, 70, 0.35);
+  border-top: 1px solid rgba(74, 69, 63,  0.35);
   margin-top: 2px;
   padding-top: 8px;
 }
@@ -978,13 +978,13 @@ onBeforeUnmount(() => {
 .gen-label {
   font-size: 12px;
   font-weight: 600;
-  color: #a1a1aa;
+  color: #b3aca0;
   margin-right: 4px;
 }
 
 .gen-hint {
   font-size: 11px;
-  color: #52525b;
+  color: #6b665e;
   flex: 1;
   min-width: 200px;
 }
@@ -1000,19 +1000,19 @@ onBeforeUnmount(() => {
 .logo-main {
   font-size: 15px;
   font-weight: 700;
-  color: var(--text-bright, #fafafa);
+  color: var(--text-bright, #f5efe5);
 }
 
 .logo-sub {
   font-size: 11px;
-  color: #818cf8;
+  color: #dcae5f;
 }
 
-.breadcrumb-sep { color: var(--text-faint, #52525b); }
+.breadcrumb-sep { color: var(--text-faint, #6b665e); }
 
 .page-title {
   font-size: 14px;
-  color: var(--text-muted, #a1a1aa);
+  color: var(--text-muted, #b3aca0);
   max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1039,8 +1039,8 @@ onBeforeUnmount(() => {
 .canvas-sidebar {
   width: 220px;
   flex-shrink: 0;
-  border-right: 1px solid var(--border-color, #27272a);
-  background: var(--bg-card, #18181b);
+  border-right: 1px solid var(--border-color, #2b2825);
+  background: var(--bg-card, #171513);
   padding: 14px 12px;
   overflow-y: auto;
 }
@@ -1052,25 +1052,25 @@ onBeforeUnmount(() => {
   font-size: 13px;
   font-weight: 700;
   margin-bottom: 12px;
-  color: var(--text-bright, #fafafa);
+  color: var(--text-bright, #f5efe5);
 }
 
 .sidebar-section { margin-bottom: 14px; }
 .sidebar-script {
   padding-bottom: 12px;
   margin-bottom: 12px;
-  border-bottom: 1px solid var(--border-color, #27272a);
+  border-bottom: 1px solid var(--border-color, #2b2825);
 }
 .sidebar-script-tip {
   margin: 0;
   font-size: 10px;
   line-height: 1.45;
-  color: var(--text-subtle, #71717a);
+  color: var(--text-subtle, #8b8478);
 }
 
 .sec-label {
   font-size: 11px;
-  color: var(--text-subtle, #71717a);
+  color: var(--text-subtle, #8b8478);
   margin-bottom: 6px;
 }
 
@@ -1084,25 +1084,25 @@ onBeforeUnmount(() => {
   font-size: 12px;
   padding: 6px 8px;
   border-radius: 6px;
-  color: var(--text-primary, #e4e4e7);
+  color: var(--text-primary, #e6e0d6);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s;
 }
-.sidebar-item:hover { background: rgba(129, 140, 248, 0.12); }
+.sidebar-item:hover { background: rgba(220, 174, 95,   0.12); }
 .sidebar-item.active { background: rgba(52, 211, 153, 0.16); color: #6ee7b7; }
 
 .workflow-item { white-space: normal; }
 .wf-item-title { font-weight: 600; }
-.wf-item-meta { font-size: 10px; color: var(--text-faint, #52525b); margin-top: 2px; }
-.sidebar-empty { font-size: 11px; color: var(--text-faint, #52525b); padding: 4px 0; }
+.wf-item-meta { font-size: 10px; color: var(--text-faint, #6b665e); margin-top: 2px; }
+.sidebar-empty { font-size: 11px; color: var(--text-faint, #6b665e); padding: 4px 0; }
 
 .sidebar-tip {
   font-size: 10px;
   line-height: 1.45;
-  color: var(--text-faint, #52525b);
+  color: var(--text-faint, #6b665e);
   margin-top: 16px;
 }
 
@@ -1115,31 +1115,31 @@ onBeforeUnmount(() => {
 .vue-flow-canvas {
   width: 100%;
   height: 100%;
-  background: #0c0c0f;
+  background: #0b0a09;
 }
 
 :deep(.vue-flow__minimap) {
-  background: rgba(24, 24, 27, 0.92);
-  border: 1px solid #3f3f46;
+  background: rgba(23, 21, 19,   0.92);
+  border: 1px solid #4a453f;
 }
 
 :deep(.vue-flow__controls) {
   box-shadow: none;
-  border: 1px solid #3f3f46;
+  border: 1px solid #4a453f;
 }
 
 :deep(.vue-flow__controls button) {
-  background: #18181b;
-  border-color: #3f3f46;
-  color: #e4e4e7;
+  background: #171513;
+  border-color: #4a453f;
+  color: #e6e0d6;
 }
 
 :deep(.vue-flow__node.selected) {
-  box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.8);
+  box-shadow: 0 0 0 2px rgba(220, 174, 95,   0.8);
 }
 </style>
 
 <style>
 html.light .drama-canvas-page { background: var(--bg-page); }
-html.light .vue-flow-canvas { background: #eef2ff; }
+html.light .vue-flow-canvas { background: #f8f1e3; }
 </style>

@@ -32,14 +32,14 @@ const storyboardCount = computed(() =>
   min-width: 280px;
   padding: 14px 18px;
   border-radius: 12px;
-  border: 1px solid rgba(129, 140, 248, 0.45);
-  background: linear-gradient(135deg, rgba(49, 46, 129, 0.55), rgba(24, 24, 27, 0.92));
+  border: 1px solid rgba(220, 174, 95,   0.45);
+  background: linear-gradient(135deg, rgba(201, 151, 63,  0.14), rgba(23, 21, 19,  0.92));
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 .title {
   font-size: 16px;
   font-weight: 700;
-  color: #f4f4f5;
+  color: #f5f1ec;
   margin-bottom: 6px;
 }
 .meta {
@@ -47,6 +47,6 @@ const storyboardCount = computed(() =>
   flex-wrap: wrap;
   gap: 10px;
   font-size: 12px;
-  color: #a1a1aa;
+  color: #b3aca0;
 }
 </style>

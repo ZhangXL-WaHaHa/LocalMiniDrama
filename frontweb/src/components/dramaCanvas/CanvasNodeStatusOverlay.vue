@@ -40,7 +40,7 @@ const status = computed(() => {
   width: 22px;
   height: 22px;
   border: 2px solid rgba(255, 255, 255, 0.15);
-  border-top-color: #818cf8;
+  border-top-color: #dcae5f;
   border-radius: 50%;
   animation: spin 0.75s linear infinite;
 }
@@ -54,7 +54,7 @@ const status = computed(() => {
 .step-audio .spinner { border-top-color: #fbbf24; }
 .msg {
   font-size: 10px;
-  color: #e4e4e7;
+  color: #e6e0d6;
   text-align: center;
   padding: 0 8px;
   line-height: 1.3;

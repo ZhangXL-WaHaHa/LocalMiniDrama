@@ -70,16 +70,16 @@ const isNodeBusy = computed(() => {
   width: 200px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(129, 140, 248, 0.35);
-  background: var(--bg-card, #18181b);
+  border: 1px solid rgba(220, 174, 95,   0.35);
+  background: var(--bg-card, #171513);
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .canvas-sb-node:hover,
 .canvas-sb-node.selected,
 .canvas-sb-node.focused {
-  border-color: #818cf8;
-  box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.35), 0 8px 24px rgba(0, 0, 0, 0.35);
+  border-color: #dcae5f;
+  box-shadow: 0 0 0 1px rgba(220, 174, 95,   0.35), 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 .head {
   display: flex;
@@ -90,7 +90,7 @@ const isNodeBusy = computed(() => {
 .num {
   font-size: 12px;
   font-weight: 700;
-  color: #a5b4fc;
+  color: #ecc98f;
 }
 .wf-badge {
   font-size: 10px;
@@ -105,7 +105,7 @@ const isNodeBusy = computed(() => {
 }
 .seg {
   font-size: 10px;
-  color: #71717a;
+  color: #8b8478;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -114,13 +114,13 @@ const isNodeBusy = computed(() => {
   font-size: 10px;
   padding: 1px 6px;
   border-radius: 999px;
-  background: rgba(167, 139, 250, 0.2);
-  color: #c4b5fd;
+  background: rgba(220, 174, 95,   0.2);
+  color: #ecc98f;
 }
 .title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-bright, #fafafa);
+  color: var(--text-bright, #f5efe5);
   margin-bottom: 6px;
   line-height: 1.35;
 }
@@ -135,7 +135,7 @@ const isNodeBusy = computed(() => {
   padding: 2px 6px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.06);
-  color: #a1a1aa;
+  color: #b3aca0;
 }
 .st-completed { color: #34d399 !important; background: rgba(52, 211, 153, 0.12) !important; }
 .st-processing { color: #60a5fa !important; }
@@ -145,7 +145,7 @@ const isNodeBusy = computed(() => {
   border-color: #60a5fa;
 }
 .highlighted {
-  box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.75), 0 8px 28px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 0 2px rgba(220, 174, 95,   0.75), 0 8px 28px rgba(201, 151, 63,   0.25);
 }
 .dimmed {
   opacity: 0.28;
@@ -156,6 +156,6 @@ const isNodeBusy = computed(() => {
 }
 .hint {
   font-size: 10px;
-  color: #52525b;
+  color: #6b665e;
 }
 </style>

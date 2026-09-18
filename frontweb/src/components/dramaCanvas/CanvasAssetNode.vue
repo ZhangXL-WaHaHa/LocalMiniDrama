@@ -97,8 +97,8 @@ const statusChip = computed(() => {
   width: 176px;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--border-muted, #3f3f46);
-  background: var(--bg-card, #18181b);
+  border: 1px solid var(--border-muted, #4a453f);
+  background: var(--bg-card, #171513);
   box-shadow: var(--shadow, 0 4px 16px rgba(0, 0, 0, 0.35));
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -141,7 +141,7 @@ const statusChip = computed(() => {
   flex: 1;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-bright, #fafafa);
+  color: var(--text-bright, #f5efe5);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -152,7 +152,7 @@ const statusChip = computed(() => {
   padding: 1px 5px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.08);
-  color: #a1a1aa;
+  color: #b3aca0;
 }
 .status-chip.st-busy,
 .status-chip.st-processing { color: #60a5fa; background: rgba(96, 165, 250, 0.15); }
@@ -160,7 +160,7 @@ const statusChip = computed(() => {
 .status-chip.st-failed { color: #f87171; background: rgba(248, 113, 113, 0.12); }
 .kind {
   font-size: 11px;
-  color: var(--text-subtle, #71717a);
+  color: var(--text-subtle, #8b8478);
   margin-top: 2px;
 }
 .kind-character { border-color: rgba(52, 211, 153, 0.45); }
