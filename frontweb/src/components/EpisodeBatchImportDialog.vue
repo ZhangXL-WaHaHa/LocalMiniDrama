@@ -265,22 +265,33 @@ async function confirmImport() {
 
 <style scoped>
 .episode-batch-import-trigger { display: inline-flex; }
-.batch-import-dialog { display: flex; flex-direction: column; }
+.batch-import-dialog {
+  --font-hand: "Kaiti SC", "STKaiti", "KaiTi", "DFKai-SB", "BiauKai", "Noto Serif SC", serif;
+  display: flex; flex-direction: column;
+}
 .batch-import-tabs { width: 100%; }
 .batch-import-panel { display: flex; flex-direction: column; gap: 16px; min-height: 420px; }
 .batch-import-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .batch-import-file { font-size: 0.85rem; color: #b3aca0; }
 .batch-import-file.is-empty { color: #8b8478; }
 .batch-import-form { margin-bottom: 0; }
-.batch-import-tip-block { display: flex; flex-direction: column; gap: 8px; }
-.batch-import-tip { font-size: 0.82rem; color: #8b8478; }
-.batch-import-code { color: #ecc98f; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace; }
+.batch-import-tip-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  border-left: 3px solid #d3a75c;
+  border-radius: 0 8px 8px 0;
+  background: rgba(211, 167, 92, 0.06);
+}
+.batch-import-tip { font-size: 0.82rem; line-height: 1.7; color: #a89a7e; }
+.batch-import-code { color: #e0be7f; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace; }
 .batch-import-empty { min-height: 320px; display: flex; align-items: center; justify-content: center; color: #8b8478; border: 1px dashed #4a453f; border-radius: 12px; }
 .batch-import-preview-header { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 12px; color: #ecc98f; font-size: 0.85rem; flex-wrap: wrap; }
 .batch-import-preview-table :deep(.el-table) { --el-table-bg-color: transparent; --el-table-tr-bg-color: transparent; --el-table-border-color: #4a453f; --el-table-header-bg-color: rgba(43, 41, 39,  0.9); --el-table-row-hover-bg-color: rgba(220, 174, 95,   0.08); color: #e6e0d6; }
 .batch-import-preview-table :deep(.el-table__inner-wrapper::before) { display: none; }
 .batch-import-preview-table :deep(th.el-table__cell) { color: #f5efe5; }
 .batch-import-preview-table :deep(td.el-table__cell) { vertical-align: top; }
-.batch-import-preview-cell { line-height: 1.6; white-space: pre-wrap; color: #d8d2cb; }
-.batch-import-preview-cell--single-line { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; }
+.batch-import-preview-cell { line-height: 1.6; white-space: pre-wrap; color: #d8d2cb; font-family: var(--font-hand); }
+.batch-import-preview-cell--single-line { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4; color: #cfc6b2; }
 </style>

@@ -712,14 +712,6 @@ html.light .project-title { color: var(--text-bright) !important; }
 html.light .project-desc { color: var(--text-muted) !important; }
 html.light .project-meta { color: var(--text-faint) !important; }
 
-html.light .episode-card {
-  background: var(--bg-inner) !important;
-  border-color: var(--border-color) !important;
-}
-html.light .episode-title { color: var(--text-bright) !important; }
-html.light .episode-num,
-html.light .episode-preview { color: var(--text-muted) !important; }
-
 html.light .quick-nav {
   background: var(--bg-card) !important;
   border-color: var(--border-color) !important;

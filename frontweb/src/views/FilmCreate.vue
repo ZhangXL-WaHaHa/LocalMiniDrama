@@ -8444,7 +8444,7 @@ html.light .btn-theme {
 /* ===== 左侧固定侧边栏 ===== */
 .quick-nav {
   position: fixed;
-  left: 0;
+  left: 56px;
   top: 0;
   bottom: 0;
   z-index: 210;
@@ -8476,7 +8476,7 @@ html.light .quick-nav {
   display: none;
 }
 @media (max-width: 768px) {
-  .quick-nav { width: 48px; padding: 12px 0; }
+  .quick-nav { left: 48px; width: 48px; padding: 12px 0; }
   .quick-nav .nav-steps, .quick-nav .nav-group { display: none; }
   .quick-nav .nav-sidebar-title { display: none; }
   .quick-nav .nav-sidebar-header { justify-content: center; padding: 0 4px 8px; }

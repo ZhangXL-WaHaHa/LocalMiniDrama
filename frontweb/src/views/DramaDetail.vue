@@ -76,16 +76,16 @@
           </el-button>
         </div>
         <div v-if="episodes.length === 0" class="empty-tip">暂无分集，点击「新增一集」开始创作</div>
-        <div v-else class="episode-grid">
+        <div v-else class="script-grid">
           <div
             v-for="ep in episodes"
             :key="ep.id"
-            class="episode-card"
+            class="script-card"
             title="点击进入制作页"
             @click="goEpisode(ep.id)"
           >
-            <div class="episode-card-header">
-              <span class="episode-num">第 {{ ep.episode_number ?? ep.number ?? '?' }} 集</span>
+            <div class="script-card-header">
+              <span class="script-ep-label">第 {{ ep.episode_number ?? ep.number ?? '?' }} 集</span>
               <el-button
                 size="small"
                 type="danger"
@@ -96,16 +96,16 @@
                 @click.stop="onDeleteEpisode(ep)"
               />
             </div>
-            <div class="episode-title">{{ ep.title || '未命名' }}</div>
-            <div class="episode-preview">{{ (ep.script_content || '').slice(0, 20) || '暂无剧本' }}</div>
-            <div class="episode-stats">
-              <span class="ep-stat">
-                <span class="ep-stat-num">{{ ep.storyboards?.length ?? 0 }}</span> 分镜
+            <div class="script-title">{{ ep.title || '未命名' }}</div>
+            <div class="script-preview">{{ ep.script_content || '暂无剧本' }}</div>
+            <div class="script-stats">
+              <span class="script-stat">
+                <span class="script-stat-num">{{ ep.storyboards?.length ?? 0 }}</span> 分镜
               </span>
-              <span v-if="ep.status" class="ep-stat ep-stat--status" :class="'ep-status--' + ep.status">{{ epStatusLabel(ep.status) }}</span>
+              <span v-if="ep.status" class="script-stat script-stat--status" :class="'script-status--' + ep.status">{{ epStatusLabel(ep.status) }}</span>
             </div>
-            <div class="episode-enter">
-              <el-icon class="episode-enter-icon"><VideoPlay /></el-icon>
+            <div class="script-enter">
+              <el-icon class="script-enter-icon"><VideoPlay /></el-icon>
               进入制作
             </div>
           </div>
@@ -1189,34 +1189,39 @@ onMounted(() => {
 
 <style scoped>
 .drama-detail {
+  --paper: #f6f1e4;
+  --paper-edge: #ddd2b8;
+  --paper-ink: #42392c;
+  --paper-ink-soft: #7a6f5c;
+  --ink-red: #b04a3e;
+  --font-hand: "Kaiti SC", "STKaiti", "KaiTi", "DFKai-SB", "BiauKai", "Noto Serif SC", serif;
   min-height: 100vh;
-  background: #100f0e;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 20% -20%, rgba(201, 151, 63,  0.1) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(220, 174, 95,  0.06) 0%, transparent 60%);
-  color: #e6e0d6;
+  color: #e8e2d4;
+  background:
+    radial-gradient(120% 50% at 50% -10%, rgba(196, 158, 92, 0.07) 0%, transparent 62%),
+    linear-gradient(180deg, #151310 0%, #0f0e0b 55%, #0c0b09 100%);
 }
 .header {
-  background: rgba(21, 19, 18,  0.82);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(220, 174, 95,   0.18);
-  padding: 12px 24px;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+  padding: 14px 24px;
+  background: rgba(17, 15, 12, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(211, 167, 92, 0.16);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
 }
 html.light .drama-detail {
-  background: #f7efdd;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 20% -20%, rgba(220, 174, 95,   0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(201, 151, 63,   0.08) 0%, transparent 60%);
+  color: #3b3427;
+  background:
+    radial-gradient(120% 50% at 50% -10%, rgba(190, 150, 80, 0.1) 0%, transparent 62%),
+    linear-gradient(180deg, #faf7f0 0%, #f4f0e6 100%);
 }
 html.light .drama-detail .header {
-  background: rgba(255, 255, 255, 0.85) !important;
-  border-bottom-color: rgba(220, 174, 95,   0.2) !important;
-  box-shadow: 0 2px 16px rgba(220, 174, 95,   0.08) !important;
+  background: rgba(250, 247, 240, 0.92) !important;
+  border-bottom-color: rgba(166, 120, 50, 0.18) !important;
+  box-shadow: 0 4px 18px rgba(90, 70, 40, 0.06) !important;
 }
 .logo {
   margin: 0;
@@ -1265,128 +1270,204 @@ html.light .breadcrumb-sep { color: #d1d5db; }
 .page-title {
   font-size: 0.88rem;
   font-weight: 500;
-  color: #b3aca0;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cfc6b2;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(211, 167, 92, 0.16);
   border-radius: 6px;
-  padding: 3px 10px;
+  padding: 3px 12px;
   max-width: 220px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 html.light .page-title {
-  color: #7d766c;
-  background: rgba(201, 151, 63,   0.06);
-  border-color: rgba(201, 151, 63,   0.15);
+  color: #7d6a45;
+  background: rgba(166, 120, 50, 0.06);
+  border-color: rgba(166, 120, 50, 0.2);
 }
 .btn-back-list {
   flex-shrink: 0;
 }
 .header-actions { margin-left: auto; display: flex; gap: 8px; flex-shrink: 0; }
-.main { max-width: min(1200px, 96vw); margin: 0 auto; padding: 24px 16px 48px; display: flex; flex-direction: column; gap: 20px; }
+.main { max-width: min(1200px, 96vw); margin: 0 auto; padding: 28px 16px 56px; display: flex; flex-direction: column; gap: 22px; }
 .section.card {
-  background: rgba(23, 21, 19,   0.75);
+  background: rgba(24, 21, 17, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(74, 69, 63,  0.7);
+  border: 1px solid rgba(211, 167, 92, 0.14);
   border-radius: 16px;
-  padding: 20px 24px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
-  transition: box-shadow 0.3s, border-color 0.3s;
+  padding: 22px 24px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.32);
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 .section.card:hover {
-  border-color: rgba(220, 174, 95,   0.25);
-  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(220, 174, 95,   0.08);
+  border-color: rgba(211, 167, 92, 0.26);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
 }
-html.light .section.card {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(220, 174, 95,   0.15);
-  box-shadow: 0 4px 20px rgba(220, 174, 95,   0.06);
-}
-html.light .section.card:hover {
-  border-color: rgba(220, 174, 95,   0.3);
-  box-shadow: 0 6px 28px rgba(220, 174, 95,   0.1);
-}
-.section-title { font-size: 1rem; font-weight: 600; color: #f5efe5; margin-bottom: 16px; }
-html.light .section-title { color: #171513; }
-.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.section-header .section-title { margin-bottom: 0; }
-.section-count { color: #8b8478; font-size: 0.85rem; }
-.info-form { max-width: 100%; }
-.empty-tip { color: #8b8478; text-align: center; padding: 32px; }
-
-/* 分集卡片 */
-.episode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-.episode-card {
-  background: rgba(28, 28, 30, 0.8);
-  border: 1px solid rgba(74, 69, 63,  0.6);
-  border-radius: 12px;
-  padding: 16px;
-  cursor: pointer;
-  transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s, background 0.2s;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-}
-.episode-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(220, 174, 95,   0.06), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.25s;
-}
-.episode-card:hover {
-  border-color: rgba(220, 174, 95,   0.5);
-  background: rgba(35, 35, 38, 0.9);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(220, 174, 95,   0.15);
-}
-.episode-card:hover::before { opacity: 1; }
-.episode-card:hover .episode-enter {
-  color: var(--el-color-primary);
-  opacity: 1;
-}
-.episode-card:hover .episode-enter-icon {
-  transform: translateX(3px);
-}
-.episode-enter {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid #2b2825;
-  font-size: 0.78rem;
-  color: #6b665e;
+.section-title {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: #e2d3ae;
+  margin-bottom: 18px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(211, 167, 92, 0.32), transparent);
+}
+.section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.section-header .section-title { margin-bottom: 0; }
+.section-count { color: #a08a5f; font-size: 0.8rem; white-space: nowrap; }
+.info-form { max-width: 100%; }
+.info-form :deep(.el-form-item .el-textarea__wrapper) {
+  border-radius: 8px;
+  background: var(--paper) !important;
+  box-shadow: 0 0 0 1px var(--paper-edge) inset !important;
+}
+.info-form :deep(.el-form-item .el-textarea__wrapper:focus-within) {
+  box-shadow: 0 0 0 1px #c9a76a inset, 0 0 0 3px rgba(201, 167, 106, 0.15) !important;
+}
+.info-form :deep(.el-form-item .el-textarea__inner) {
+  font-family: var(--font-hand);
+  color: var(--paper-ink) !important;
+  caret-color: var(--ink-red);
+  line-height: 28px;
+  padding: 6px 16px 8px 16px;
+  background-image: repeating-linear-gradient(180deg, transparent 0 27px, rgba(122, 100, 62, 0.14) 27px 28px);
+  background-attachment: local;
+}
+.info-form :deep(.el-form-item .el-textarea__inner::placeholder) { color: rgba(122, 111, 92, 0.5) !important; }
+.empty-tip {
+  color: #9a8c72;
+  text-align: center;
+  padding: 40px;
+  border: 1px dashed rgba(211, 167, 92, 0.25);
+  border-radius: 12px;
+  font-family: var(--font-hand);
+  letter-spacing: 0.04em;
+}
+
+/* 分集卡片 · 剧本扉页 */
+.script-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+.script-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 18px 12px;
+  background: linear-gradient(180deg, #f7f2e6 0%, #f1ead8 100%);
+  border: 1px solid var(--paper-edge);
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--paper-ink);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s var(--ease-out, ease), box-shadow 0.2s, border-color 0.2s;
+  overflow: hidden;
+}
+.script-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: linear-gradient(180deg, #b04a3e, #8e3a30);
   opacity: 0.7;
-  transition: color 0.2s, opacity 0.2s;
 }
-.episode-enter-icon {
-  font-size: 0.85rem;
-  transition: transform 0.2s;
+.script-card:hover {
+  transform: translateY(-3px);
+  border-color: #c9a76a;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
 }
-.episode-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-.episode-num { font-size: 0.8rem; color: #8b8478; }
-.episode-title { font-weight: 500; color: #f5efe5; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.episode-preview { font-size: 0.78rem; color: #8b8478; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; }
-.episode-stats { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ep-stat { font-size: 0.72rem; color: #8b8478; }
-.ep-stat-num { color: #38bdf8; font-weight: 600; }
-.ep-stat--status { padding: 1px 7px; border-radius: 99px; font-size: 0.7rem; }
-.ep-status--draft { background: rgba(138, 133, 126, 0.15); color: #b3aca0; }
-.ep-status--processing { background: rgba(234,179,8,0.12); color: #fcd34d; }
-.ep-status--completed { background: rgba(34,197,94,0.12); color: #4ade80; }
-.ep-status--failed { background: rgba(239,68,68,0.12); color: #f87171; }
+.script-card-header { position: relative; margin-bottom: 10px; }
+.script-card-header :deep(.el-button) {
+  position: absolute;
+  right: -8px;
+  top: 6px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.script-card:hover .script-card-header :deep(.el-button),
+.script-card-header :deep(.el-button.is-loading),
+.script-card-header :deep(.el-button:focus-visible) { opacity: 1; }
+.script-ep-label {
+  display: block;
+  text-align: center;
+  font-family: var(--font-hand);
+  font-size: 0.76rem;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  color: #9a8a6c;
+  padding: 13px 0 9px;
+  border-bottom: 1px solid rgba(122, 100, 62, 0.18);
+}
+.script-title {
+  font-family: var(--font-hand);
+  font-weight: 700;
+  font-size: 1.12rem;
+  line-height: 1.45;
+  text-align: center;
+  color: #3a3226;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.script-preview {
+  font-family: var(--font-hand);
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: var(--paper-ink-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.9em;
+  margin-bottom: 10px;
+}
+.script-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.script-stat { font-size: 0.72rem; color: var(--paper-ink-soft); }
+.script-stat-num { color: #8a6a2f; font-weight: 600; }
+.script-stat--status { padding: 1px 8px; border-radius: 99px; font-size: 0.7rem; }
+.script-status--draft { background: rgba(122, 102, 71, 0.13); color: #7a6647; }
+.script-status--processing { background: rgba(176, 120, 32, 0.14); color: #8a6210; }
+.script-status--completed { background: rgba(46, 125, 80, 0.13); color: #2e7d50; }
+.script-status--failed { background: rgba(176, 58, 58, 0.12); color: #b03a3a; }
+.script-enter {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(122, 100, 62, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  color: #a4906c;
+  transition: color 0.2s;
+}
+.script-enter-icon { font-size: 0.85rem; transition: transform 0.2s; }
+.script-card:hover .script-enter { color: #8a6a2f; }
+.script-card:hover .script-enter-icon { transform: translateX(3px); }
 
 /* 资源库 */
 .library-toolbar { margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
 .import-tip { font-size: 0.8rem; color: #8b8478; }
 .import-list { max-height: 480px; }
 .library-list { min-height: 120px; display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; }
-.library-item { display: flex; gap: 12px; padding: 10px; background: #1b1917; border: 1px solid #2b2825; border-radius: 8px; }
+.library-item { display: flex; gap: 12px; padding: 10px; background: rgba(30, 27, 21, 0.55); border: 1px solid rgba(211, 167, 92, 0.1); border-radius: 8px; }
 .library-item-cover { width: 72px; height: 72px; flex-shrink: 0; border-radius: 6px; overflow: hidden; background: #2b2825; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .library-item-cover img { width: 100%; height: 100%; object-fit: cover; }
 .library-placeholder { font-size: 0.8rem; color: #8b8478; }
@@ -1453,23 +1534,29 @@ html.light .section-title { color: #171513; }
 }
 .res-tab:hover { color: var(--text-primary); background: var(--bg-inner, rgba(255,255,255,0.04)); }
 /* 资源库激活 */
-.res-tab--lib.active { color: #60a5fa; font-size: 14px; font-weight: 600; }
-.res-tab--lib.active::after { background: #60a5fa; }
+.res-tab--lib.active { color: #ece3cd; font-size: 14px; font-weight: 600; }
+.res-tab--lib.active::after { background: rgba(211, 167, 92, 0.55); }
 /* 制作资源激活 */
 .res-tab--drama.active { color: #dcae5f; font-size: 14px; font-weight: 600; }
 .res-tab--drama.active::after { background: #dcae5f; }
 
-html.light .episode-card { background: rgba(255, 255, 255, 0.85); border-color: rgba(220, 174, 95,   0.12); }
-html.light .episode-card:hover { background: rgba(245, 243, 255, 0.95); border-color: rgba(220, 174, 95,   0.4); box-shadow: 0 8px 24px rgba(220, 174, 95,   0.12); }
-html.light .episode-card::before { background: linear-gradient(135deg, rgba(220, 174, 95,   0.05), transparent 60%); }
-html.light .episode-enter { border-top-color: #e6e0d6; color: #b3aca0; }
-html.light .episode-card:hover .episode-enter { color: var(--el-color-primary); }
-html.light .episode-title { color: #171513; }
+html.light .drama-detail .section.card {
+  background: #fffdf8 !important;
+  border-color: rgba(166, 120, 50, 0.16) !important;
+  box-shadow: 0 6px 24px rgba(90, 70, 40, 0.06);
+}
+html.light .drama-detail .section.card:hover {
+  border-color: rgba(166, 120, 50, 0.3) !important;
+}
+html.light .section-title { color: #6b5327 !important; }
+html.light .section-title::after { background: linear-gradient(90deg, rgba(166, 120, 50, 0.28), transparent); }
+html.light .section-count { color: #a08a5f; }
+html.light .empty-tip { color: #a08a5f; border-color: rgba(166, 120, 50, 0.25); }
 html.light .res-tab:hover { background: rgba(0,0,0,0.04); }
-html.light .res-tab--lib.active { color: #2563eb; }
-html.light .res-tab--lib.active::after { background: #2563eb; }
-html.light .res-tab--drama.active { color: #c9973f; }
-html.light .res-tab--drama.active::after { background: #c9973f; }
+html.light .res-tab--lib.active { color: #57431f; }
+html.light .res-tab--lib.active::after { background: rgba(166, 120, 50, 0.5); }
+html.light .res-tab--drama.active { color: #a67832; }
+html.light .res-tab--drama.active::after { background: #a67832; }
 
 /* 本剧制作资源列表 */
 .drama-res-list { display: flex; flex-wrap: wrap; gap: 12px; padding: 4px 0 8px; }
@@ -1493,22 +1580,7 @@ html.light .res-tab--drama.active::after { background: #c9973f; }
 .image-preview-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: flex; align-items: center; justify-content: center; z-index: 9999; cursor: zoom-out; }
 .image-preview-img { max-width: 90vw; max-height: 90vh; border-radius: 8px; object-fit: contain; }
 
-/* 主题切换按钮 */
-.btn-theme {
-  --el-button-bg-color: rgba(160, 152, 142,  0.1);
-  --el-button-border-color: rgba(160, 152, 142,  0.3);
-  --el-button-text-color: #a8a29a;
-  --el-button-hover-bg-color: rgba(160, 152, 142,  0.2);
-  --el-button-hover-border-color: rgba(160, 152, 142,  0.5);
-  --el-button-hover-text-color: #d0c9c0;
-  transition: all 0.2s;
-}
-html.light .btn-theme {
-  --el-button-bg-color: rgba(201, 151, 63,   0.08);
-  --el-button-border-color: rgba(201, 151, 63,   0.3);
-  --el-button-text-color: #c9973f;
-  --el-button-hover-bg-color: rgba(201, 151, 63,   0.15);
-  --el-button-hover-border-color: rgba(201, 151, 63,   0.5);
-  --el-button-hover-text-color: #ab7c30;
+@media (prefers-reduced-motion: reduce) {
+  .script-card, .script-card:hover { transition: none; }
 }
 </style>
