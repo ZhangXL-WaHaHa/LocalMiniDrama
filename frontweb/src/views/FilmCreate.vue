@@ -182,22 +182,39 @@
         style="display: none"
         @change="onSbImageFileChange"
       />
-      <!-- 剧本工作台：单卡片 + 选项卡（创作 / 选择） -->
+      <!-- 剧本工作台：银幕式主视觉 + 选项卡（创作 / 选择） -->
       <section class="section card script-workbench-unified">
+        <div class="swb-masthead">
+          <div class="swb-mast-mark" aria-hidden="true">SCREENPLAY</div>
+          <p class="swb-eyebrow">
+            <i class="swb-rule" aria-hidden="true"></i>
+            <span class="swb-star">★</span> SCRIPT WORKSHOP · 剧本工作台 <span class="swb-star">★</span>
+            <i class="swb-rule swb-rule--right" aria-hidden="true"></i>
+          </p>
+          <h2 class="swb-title">从故事，到剧本</h2>
+          <p class="swb-billing">FROM STORY TO SCREENPLAY</p>
+          <p class="swb-sub">一段梗概交给 AI 扩写成完整剧本；也可导入小说章节，或从剧本库选片开拍</p>
+        </div>
         <el-tabs v-model="scriptWorkbenchMode" class="script-workbench-tabs">
           <el-tab-pane label="创作剧本" name="create">
             <div class="script-pane-inner">
-              <div class="script-sub-block">
-                <h2 class="section-title">故事生成</h2>
+              <div class="script-sub-block swb-panel">
+                <header class="swb-block-head">
+                  <span class="swb-block-num">01</span>
+                  <div class="swb-block-head-text">
+                    <h2 class="section-title">故事生成</h2>
+                    <span class="swb-block-tag">Story Synopsis</span>
+                  </div>
+                </header>
                 <p class="section-desc">输入一段故事梗概，AI 帮你扩写成完整剧本，或直接导入小说章节</p>
                 <el-input
                   v-model="storyInput"
                   type="textarea"
-                  :rows="4"
+                  :rows="6"
                   placeholder="例如：一个少女在森林里遇见会说话的狐狸，一起寻找失落的宝石..."
-                  class="story-textarea"
+                  class="story-textarea swb-story-input"
                 />
-                <div class="row gap" style="margin-top: 10px; flex-wrap: wrap;">
+                <div class="row gap swb-controls">
                   <el-select v-model="storyStyle" placeholder="故事风格" clearable style="width: 120px" @change="() => saveProjectSettings(false)">
                     <el-option label="现代" value="modern" />
                     <el-option label="古风" value="ancient" />
@@ -209,7 +226,7 @@
                     <el-option label="喜剧" value="comedy" />
                     <el-option label="冒险" value="adventure" />
                   </el-select>
-                  <div style="display:flex;align-items:center;gap:6px;font-size:13px">
+                  <div class="swb-episode-count">
                     <span>集数</span>
                     <el-input-number
                       v-model="storyEpisodeCount"
@@ -220,7 +237,8 @@
                       style="width: 100px"
                     />
                   </div>
-                  <el-button type="primary" :loading="isStoryGenRunning" @click="onGenerateStory">
+                  <el-button type="primary" class="swb-btn-generate" :loading="isStoryGenRunning" @click="onGenerateStory">
+                    <el-icon v-if="!isStoryGenRunning"><MagicStick /></el-icon>
                     生成剧本
                   </el-button>
                   <el-button plain @click="showNovelImport = true">
@@ -229,10 +247,19 @@
                   </el-button>
                 </div>
               </div>
-              <div class="script-sub-divider" />
-              <div id="anchor-script" class="script-sub-block">
-                <h2 class="section-title">剧本</h2>
-                <div class="row gap" style="margin-bottom: 10px; flex-wrap: wrap;">
+              <div class="swb-divider-v" aria-hidden="true"><span>✦</span></div>
+              <div id="anchor-script" class="script-sub-block swb-panel">
+                <header class="swb-block-head">
+                  <span class="swb-block-num">02</span>
+                  <div class="swb-block-head-text">
+                    <h2 class="section-title">剧本</h2>
+                    <span class="swb-block-tag">Screenplay</span>
+                  </div>
+                  <el-button v-if="dramaId" class="swb-add-episode" @click="onAddEpisode">
+                    <el-icon><Plus /></el-icon>添加一集
+                  </el-button>
+                </header>
+                <div class="row gap swb-episode-row">
                   <el-select
                     v-model="selectedEpisodeId"
                     placeholder="选择集数"
@@ -248,19 +275,16 @@
                       :value="ep.id"
                     />
                   </el-select>
-                  <el-input v-model="scriptTitle" placeholder="集标题" style="width: 150px" />
-                  <el-button v-if="dramaId" style="margin-left: auto" @click="onAddEpisode">
-                    <el-icon><Plus /></el-icon>添加一集
-                  </el-button>
+                  <el-input v-model="scriptTitle" placeholder="本集标题" style="width: 170px" />
                 </div>
                 <el-input
                   v-model="scriptContent"
                   type="textarea"
-                  :rows="8"
+                  :rows="13"
                   placeholder="剧本内容将显示在这里，可直接编辑..."
-                  class="story-textarea"
+                  class="story-textarea swb-script-input"
                 />
-                <div class="row gap" style="margin-top: 8px; flex-wrap: wrap;">
+                <div class="row gap swb-controls">
                   <el-button
                     :loading="scriptGenerating"
                     :disabled="!!dramaId && (store.drama?.episodes?.length > 0) && !currentEpisodeId"
@@ -303,7 +327,7 @@
                       type="textarea"
                       :rows="12"
                       readonly
-                      class="story-textarea"
+                      class="story-textarea swb-script-input"
                     />
                   </el-tab-pane>
                 </el-tabs>
@@ -315,7 +339,7 @@
                   type="textarea"
                   :rows="12"
                   readonly
-                  class="story-textarea"
+                  class="story-textarea swb-script-input"
                 />
               </template>
               <div class="preview-actions">
@@ -441,24 +465,36 @@
 
       <!-- 资源管理：角色 / 道具 / 场景 -->
       <section class="section card resource-panel">
-        <div class="collapse-header" @click="resourcePanelCollapsed = !resourcePanelCollapsed">
-          <h2 class="section-title">资源管理</h2>
+        <div class="collapse-header rp-collapse-header" @click="resourcePanelCollapsed = !resourcePanelCollapsed">
+          <div class="rp-head-main">
+            <span class="rp-head-glyph" aria-hidden="true"><el-icon><Collection /></el-icon></span>
+            <div class="rp-head-text">
+              <h2 class="section-title">资源管理</h2>
+              <span class="rp-head-tag">Asset Workshop · Cast / Props / Scenes</span>
+            </div>
+          </div>
           <el-icon class="collapse-icon"><ArrowUp v-if="!resourcePanelCollapsed" /><ArrowDown v-else /></el-icon>
         </div>
         <div v-show="!resourcePanelCollapsed" class="resource-panel-body">
           <!-- 角色生成 -->
           <div id="anchor-characters" class="resource-block card">
             <div class="collapse-header resource-block-header" @click="charactersBlockCollapsed = !charactersBlockCollapsed">
-              <h3 class="resource-block-title">角色生成</h3>
+              <div class="rp-head-main">
+                <span class="rp-head-glyph rp-head-glyph--sm" aria-hidden="true"><el-icon><User /></el-icon></span>
+                <div class="rp-head-text">
+                  <h3 class="resource-block-title">角色生成</h3>
+                  <span class="rp-head-tag">Cast · Characters</span>
+                </div>
+              </div>
               <el-icon class="collapse-icon"><ArrowUp v-if="!charactersBlockCollapsed" /><ArrowDown v-else /></el-icon>
             </div>
             <div v-show="!charactersBlockCollapsed" class="resource-block-body">
               <div class="asset-actions">
-                <el-button type="primary" size="small" :loading="charactersGenerating" :disabled="!dramaId" @click="onGenerateCharacters">
+                <el-button type="primary" :loading="charactersGenerating" :disabled="!dramaId" @click="onGenerateCharacters">
                   剧本自动提取角色
                 </el-button>
-                <el-button size="small" :disabled="!dramaId" @click="openAddCharacter">添加角色</el-button>
-                <el-button size="small" @click="showCharLibrary = true">本剧角色库</el-button>
+                <el-button :disabled="!dramaId" @click="openAddCharacter">添加角色</el-button>
+                <el-button @click="showCharLibrary = true">本剧角色库</el-button>
               </div>
               <div class="asset-list asset-list-two">
                 <div v-for="char in characters" :key="char.id" class="asset-item asset-item-left-right">
@@ -598,16 +634,22 @@
           <!-- 道具生成 -->
           <div id="anchor-props" class="resource-block card">
             <div class="collapse-header resource-block-header" @click="propsBlockCollapsed = !propsBlockCollapsed">
-              <h3 class="resource-block-title">道具生成</h3>
+              <div class="rp-head-main">
+                <span class="rp-head-glyph rp-head-glyph--sm" aria-hidden="true"><el-icon><Box /></el-icon></span>
+                <div class="rp-head-text">
+                  <h3 class="resource-block-title">道具生成</h3>
+                  <span class="rp-head-tag">Props</span>
+                </div>
+              </div>
               <el-icon class="collapse-icon"><ArrowUp v-if="!propsBlockCollapsed" /><ArrowDown v-else /></el-icon>
             </div>
             <div v-show="!propsBlockCollapsed" class="resource-block-body">
               <div class="asset-actions">
-                <el-button type="primary" size="small" :loading="propsExtracting" :disabled="!currentEpisodeId" @click="onExtractProps">从剧本提取道具</el-button>
-                <el-button size="small" :disabled="!dramaId" @click="showAddProp = true">添加道具</el-button>
-                <el-button size="small" @click="showPropLibrary = true">本剧道具库</el-button>
+                <el-button type="primary" :loading="propsExtracting" :disabled="!currentEpisodeId" @click="onExtractProps">从剧本提取道具</el-button>
+                <el-button :disabled="!dramaId" @click="showAddProp = true">添加道具</el-button>
+                <el-button @click="showPropLibrary = true">本剧道具库</el-button>
               </div>
-              <div class="prop-gen-mode" style="margin: 8px 0; font-size: 13px;">
+              <div class="prop-gen-mode" style="margin: 10px 0; font-size: 14px;">
                 <el-checkbox v-model="propUseQuadGrid">生成四视图道具（默认单图，纯色无缝背景）</el-checkbox>
               </div>
               <div class="asset-list asset-list-two">
@@ -697,18 +739,24 @@
           <!-- 场景生成 -->
           <div id="anchor-scenes" class="resource-block card">
             <div class="collapse-header resource-block-header" @click="scenesBlockCollapsed = !scenesBlockCollapsed">
-              <h3 class="resource-block-title">场景生成</h3>
+              <div class="rp-head-main">
+                <span class="rp-head-glyph rp-head-glyph--sm" aria-hidden="true"><el-icon><PictureFilled /></el-icon></span>
+                <div class="rp-head-text">
+                  <h3 class="resource-block-title">场景生成</h3>
+                  <span class="rp-head-tag">Scenes · Locations</span>
+                </div>
+              </div>
               <el-icon class="collapse-icon"><ArrowUp v-if="!scenesBlockCollapsed" /><ArrowDown v-else /></el-icon>
             </div>
             <div v-show="!scenesBlockCollapsed" class="resource-block-body">
               <div class="asset-actions">
-                <el-button type="primary" size="small" :loading="scenesExtracting" :disabled="!currentEpisodeId" @click="onExtractScenes">
+                <el-button type="primary" :loading="scenesExtracting" :disabled="!currentEpisodeId" @click="onExtractScenes">
                   从剧本提取场景
                 </el-button>
-                <el-button size="small" :disabled="!dramaId" @click="openAddScene">添加场景</el-button>
-                <el-button size="small" @click="showSceneLibrary = true">本剧场景库</el-button>
+                <el-button :disabled="!dramaId" @click="openAddScene">添加场景</el-button>
+                <el-button @click="showSceneLibrary = true">本剧场景库</el-button>
               </div>
-              <div class="scene-gen-mode" style="margin: 8px 0; font-size: 13px;">
+              <div class="scene-gen-mode" style="margin: 10px 0; font-size: 14px;">
                 <el-checkbox v-model="sceneUseQuadGrid">生成四宫格场景（默认单图）</el-checkbox>
               </div>
               <div class="asset-list asset-list-two">
@@ -799,26 +847,31 @@
 
       <!-- 6. 分镜生成 -->
       <section id="anchor-storyboard" class="section card">
-        <h2 class="section-title">
-          <span>5. 分镜生成</span>
-          <span class="step-desc">根据剧本、角色、场景自动生成分镜头脚本</span>
-        </h2>
+        <header class="sbz-head">
+          <span class="rp-head-glyph rp-head-glyph--lg" aria-hidden="true"><el-icon><Film /></el-icon></span>
+          <div class="sbz-head-text">
+            <h2 class="section-title">分镜生成</h2>
+            <span class="rp-head-tag">Storyboard · Shot List</span>
+          </div>
+          <p class="sbz-desc">根据剧本、角色、场景自动生成分镜头脚本</p>
+        </header>
+        <div class="sb-config-strip">
         <div class="sb-config-row">
           <label class="sb-config-item">
             <span class="sb-config-label">分镜数量</span>
             <el-input-number v-model="storyboardCount" :min="1" :max="200" :step="5" placeholder="自动" class="sb-config-input" />
             <span class="sb-config-hint sb-config-hint--estimate" :title="scriptEstimateStoryboardTitle">留空由 AI 决定{{ scriptEstimateStoryboardHint }}</span>
           </label>
-          <span class="sb-config-divider">｜</span>
+          <i class="sb-config-divider" aria-hidden="true"></i>
           <label class="sb-config-item">
             <span class="sb-config-label">视频总时长(秒)</span>
             <el-input-number v-model="videoDuration" :min="10" :max="600" :step="5" placeholder="自动" class="sb-config-input" />
             <span class="sb-config-hint sb-config-hint--estimate" :title="scriptEstimateVideoDurationTitle">留空由 AI 决定{{ scriptEstimateVideoDurationHint }}</span>
           </label>
-          <span class="sb-config-divider">｜</span>
+          <i class="sb-config-divider" aria-hidden="true"></i>
           <label class="sb-config-item">
             <span class="sb-config-label">序列图模式</span>
-            <el-select v-model="gridMode" size="small" style="width:110px" :disabled="storyboardUseFirstLastFrame">
+            <el-select v-model="gridMode" size="small" style="width:130px" :disabled="storyboardUseFirstLastFrame">
               <el-option label="单张" value="single" />
               <el-option label="四宫格" value="quad_grid" />
               <el-option label="九宫格" value="nine_grid" />
@@ -826,7 +879,7 @@
             <span class="sb-config-hint">四/九宫格自动按视角拆分</span>
           </label>
         </div>
-        <div class="sb-config-row sb-narration-export-row" style="margin-top:10px;flex-wrap:wrap;align-items:center;gap:12px">
+        <div class="sb-config-row sb-narration-export-row">
           <el-checkbox v-model="storyboardUseFirstLastFrame" @change="onStoryboardUseFirstLastFrameChange">
             首尾帧参考图（经典模式双槽；图生前先走专业帧提示词模块 first/last，再生图；视频绑定 first/last_frame_url）
           </el-checkbox>
@@ -859,6 +912,7 @@
           >
             导出解说 SRT
           </el-button>
+        </div>
         </div>
         <div class="asset-actions sb-batch-actions">
           <div class="flex">
@@ -1016,7 +1070,6 @@
                   multiple
                   collapse-tags
                   collapse-tags-tooltip
-                  size="small"
                   class="sb-select"
                   @update:model-value="(v) => setSbCharacterIds(sb.id, v)"
                 >
@@ -1034,7 +1087,6 @@
                   v-model="sbSceneId[sb.id]"
                   placeholder="选择场景"
                   clearable
-                  size="small"
                   class="sb-select"
                   @change="() => onStoryboardSceneChange(sb.id)"
                 >
@@ -1051,7 +1103,6 @@
                   multiple
                   collapse-tags
                   collapse-tags-tooltip
-                  size="small"
                   class="sb-select"
                   @update:model-value="(v) => setSbPropIds(sb.id, v)"
                 >
@@ -2630,7 +2681,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, reactive, nextTick } 
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Setting, Plus, Minus, MagicStick, Upload, Delete, Check, Loading, WarningFilled, User, Box, Picture, Film, VideoCamera, Document, InfoFilled, Refresh, ZoomIn, QuestionFilled, DocumentAdd, Expand, Fold, VideoPlay, Grid, Close } from '@element-plus/icons-vue'
+  import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Setting, Plus, Minus, MagicStick, Upload, Delete, Check, Loading, WarningFilled, User, Box, Picture, PictureFilled, Film, VideoCamera, Document, InfoFilled, Refresh, ZoomIn, QuestionFilled, DocumentAdd, Expand, Fold, VideoPlay, Grid, Close, Collection } from '@element-plus/icons-vue'
 import { useFilmStore } from '@/stores/film'
 import { useGenerationTaskStore, GEN_RESOURCE } from '@/stores/generationTaskStore'
 import { syncGeneratingSetsFromStore, buildEpisodeContext, buildExtractTaskMeta, isEpisodeExtractRunning } from '@/composables/useGenerationTaskSync'
@@ -8198,46 +8249,305 @@ watch(
 </script>
 
 <style scoped>
-.script-workbench-unified {
+/* ===================== 剧本工作台 · 银幕式主视觉 ===================== */
+.card.script-workbench-unified {
+  position: relative;
   margin-bottom: 0;
+  padding: clamp(18px, 2.4vw, 32px) clamp(16px, 2.6vw, 36px) clamp(16px, 2.2vw, 28px);
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgba(201, 151, 63, 0.085) 0%, transparent 58%),
+    linear-gradient(180deg, #211e1a 0%, #1c1a17 46%, #1a1815 100%);
+  border-color: rgba(220, 174, 95, 0.16);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15), 0 24px 70px -36px rgba(201, 151, 63, 0.22);
 }
+/* 顶部金色发丝线 */
+.card.script-workbench-unified::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(220, 174, 95, 0.55), transparent);
+  pointer-events: none;
+}
+html.light .card.script-workbench-unified {
+  border-color: rgba(201, 151, 63, 0.22) !important;
+  box-shadow: 0 4px 20px rgba(201, 151, 63, 0.06), 0 12px 40px -20px rgba(43, 35, 24, 0.12);
+}
+
+/* —— Masthead：银幕片头 —— */
+.swb-masthead {
+  position: relative;
+  text-align: center;
+  padding: clamp(10px, 1.8vw, 26px) 0 clamp(14px, 2vw, 24px);
+  margin-bottom: clamp(4px, 1vw, 10px);
+}
+.swb-mast-mark {
+  position: absolute;
+  left: 50%;
+  top: clamp(-30px, -1.6vw, -12px);
+  transform: translateX(-50%);
+  font-size: clamp(3.6rem, 8vw, 6.6rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: transparent;
+  background: linear-gradient(180deg, rgba(220, 174, 95, 0.08) 0%, rgba(220, 174, 95, 0.015) 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 1px rgba(220, 174, 95, 0.07);
+  user-select: none;
+  pointer-events: none;
+}
+html.light .swb-mast-mark {
+  background: linear-gradient(180deg, rgba(201, 151, 63, 0.12) 0%, rgba(201, 151, 63, 0.02) 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 1px rgba(201, 151, 63, 0.12);
+}
+.swb-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 0 0 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: #dcae5f;
+  text-transform: uppercase;
+}
+.swb-rule {
+  width: clamp(28px, 6vw, 72px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(220, 174, 95, 0.55));
+}
+.swb-rule--right {
+  background: linear-gradient(-90deg, transparent, rgba(220, 174, 95, 0.55));
+}
+.swb-star {
+  font-size: 0.66rem;
+  color: rgba(220, 174, 95, 0.7);
+}
+.swb-title {
+  margin: 0 0 10px;
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  background: var(--gradient-highlight);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(201, 151, 63, 0.18));
+}
+html.light .swb-title {
+  background: linear-gradient(146deg, #8c6425 0%, #c9973f 55%, #ab7c30 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: none;
+}
+.swb-billing {
+  margin: 0 0 14px;
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.46em;
+  text-indent: 0.46em;
+  color: rgba(220, 174, 95, 0.55);
+  text-transform: uppercase;
+}
+html.light .swb-billing { color: rgba(172, 124, 48, 0.6); }
+.swb-sub {
+  margin: 0 auto;
+  max-width: 560px;
+  font-size: 0.92rem;
+  color: #b3aca0;
+}
+html.light .swb-sub { color: var(--text-muted); }
+
+/* —— 选项卡 —— */
 .script-workbench-tabs :deep(.el-tabs__header) {
-  margin-bottom: 16px;
+  margin: 0 0 24px;
 }
 .script-workbench-tabs :deep(.el-tabs__nav-wrap::after) {
   height: 1px;
 }
 .script-workbench-tabs :deep(.el-tabs__item) {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
+  letter-spacing: 0.05em;
+  height: 46px;
+  line-height: 46px;
 }
+
+/* —— 双栏布局（01 故事 / 02 剧本） —— */
 .script-pane-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+.swb-divider-v { display: none; }
+@media (min-width: 1180px) {
+  .script-pane-inner {
+    grid-template-columns: 1fr 1px 1.16fr;
+    gap: 0 30px;
+    align-items: stretch;
+  }
+  .swb-divider-v {
+    display: block;
+    position: relative;
+    width: 1px;
+    background: linear-gradient(180deg, transparent 2%, rgba(220, 174, 95, 0.3) 26%, rgba(220, 174, 95, 0.3) 74%, transparent 98%);
+  }
+  .swb-divider-v span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    line-height: 1;
+    color: rgba(220, 174, 95, 0.8);
+    background: #1c1a17;
+    padding: 8px 1px;
+  }
+  html.light .swb-divider-v {
+    background: linear-gradient(180deg, transparent 2%, rgba(201, 151, 63, 0.35) 26%, rgba(201, 151, 63, 0.35) 74%, transparent 98%);
+  }
+  html.light .swb-divider-v span {
+    color: #b98a2e;
+    background: var(--bg-card);
+  }
+}
+
+/* —— 内嵌面板 —— */
+.swb-panel {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  min-width: 0;
+  padding: clamp(16px, 1.8vw, 24px);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.script-sub-block {
-  padding-top: 4px;
+html.light .swb-panel {
+  background: var(--bg-inner);
+  border-color: var(--border-color);
 }
-.script-sub-divider {
-  margin: 20px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+.swb-panel .story-textarea { margin-bottom: 0; }
+
+/* —— 编号式小节头 —— */
+.swb-block-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
 }
-html.light .script-sub-divider {
-  border-top-color: rgba(0, 0, 0, 0.08);
+.swb-block-num {
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+  color: transparent;
+  background: linear-gradient(165deg, rgba(245, 230, 196, 0.95), rgba(201, 151, 63, 0.5));
+  -webkit-background-clip: text;
+  background-clip: text;
 }
+html.light .swb-block-num {
+  background: linear-gradient(165deg, #ab7c30, #dcae5f);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.swb-block-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.swb-block-head .section-title {
+  margin: 0;
+  font-size: 1.12rem;
+}
+.swb-block-tag {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(220, 174, 95, 0.5);
+}
+html.light .swb-block-tag { color: rgba(172, 124, 48, 0.6); }
+.swb-add-episode {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* —— 工具行 —— */
+.swb-controls { margin-top: 14px; }
+.swb-episode-row { margin: 4px 0 12px; }
+.swb-episode-count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.swb-btn-generate {
+  padding: 12px 26px;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+}
+
+/* —— 稿纸排版：故事输入自适应填充，剧本正文用衬线稿纸体 —— */
+.swb-story-input { flex: 1 1 auto; }
+.swb-story-input :deep(.el-textarea__inner) { height: 100%; }
+.swb-script-input :deep(.el-textarea__inner) {
+  font-family: Georgia, "Times New Roman", "Songti SC", SimSun, serif;
+  font-size: 14.5px;
+  line-height: 2.05;
+  letter-spacing: 0.015em;
+}
+
+/* —— 选择剧本 · 提示与预览 —— */
 .script-mode-hint {
-  margin-top: 0;
-  margin-bottom: 12px;
+  margin: 2px 0 18px;
+  padding: 12px 16px;
+  border-left: 3px solid rgba(220, 174, 95, 0.55);
+  border-radius: 0 10px 10px 0;
+  background: rgba(201, 151, 63, 0.07);
+  font-size: 0.85rem;
 }
+html.light .script-mode-hint { background: rgba(201, 151, 63, 0.06); }
 .script-preview-wrap {
-  margin-top: 20px;
+  margin-top: 22px;
+  padding: clamp(16px, 2vw, 24px);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
+html.light .script-preview-wrap {
+  background: var(--bg-inner);
+  border-color: var(--border-color);
+}
+.script-preview-wrap .story-textarea { margin-bottom: 0; }
 .preview-block-title {
-  margin: 16px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 10px;
   font-size: 0.95rem;
   font-weight: 600;
   color: #b3aca0;
+}
+.preview-block-title::before {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(220, 174, 95, 0.7), transparent);
 }
 html.light .preview-block-title {
   color: #7d766c;
@@ -8249,10 +8559,15 @@ html.light .preview-block-title {
   margin-top: 16px;
 }
 .script-select-empty {
-  margin-top: 16px;
+  margin-top: 18px;
+  padding: 36px 20px;
+  text-align: center;
   color: #8b8478;
   font-size: 14px;
+  border: 1px dashed rgba(220, 174, 95, 0.25);
+  border-radius: 12px;
 }
+html.light .script-select-empty { border-color: rgba(201, 151, 63, 0.3); }
 .select-script-list {
   min-height: 120px;
   max-height: 420px;
@@ -9034,7 +9349,14 @@ html.light .section-title { color: #2c1b10; }
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+.sb-batch-actions .flex {
+  display: flex;
+  align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 .sb-batch-right {
   display: flex;
@@ -9197,7 +9519,7 @@ html.light .section-title { color: #2c1b10; }
   gap: 8px;
 }
 
-/* 资源管理大面板 + 可折叠标题 */
+/* 资源管理大面板 + 可折叠标题 —— 影院工作台版式 */
 .resource-panel {
   padding: 0;
   overflow: hidden;
@@ -9214,20 +9536,90 @@ html.light .section-title { color: #2c1b10; }
 .collapse-header:hover {
   background: rgba(255, 255, 255, 0.04);
 }
+/* 面板头：金色微渐变 + 图标徽章 */
 .resource-panel .collapse-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 20px 26px;
+  border-bottom: 1px solid rgba(220, 174, 95, 0.16);
+  background: linear-gradient(90deg, rgba(201, 151, 63, 0.06) 0%, transparent 58%);
+}
+.resource-panel .collapse-header:hover {
+  background: linear-gradient(90deg, rgba(201, 151, 63, 0.09) 0%, transparent 58%);
+}
+html.light .resource-panel .collapse-header {
+  border-bottom-color: rgba(201, 151, 63, 0.22);
+  background: linear-gradient(90deg, rgba(201, 151, 63, 0.05) 0%, transparent 58%);
+}
+html.light .resource-panel .collapse-header:hover {
+  background: linear-gradient(90deg, rgba(201, 151, 63, 0.08) 0%, transparent 58%);
 }
 .resource-panel .collapse-header .section-title {
   margin: 0;
+  font-size: 1.38rem;
 }
 .collapse-icon {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: #b3aca0;
   flex-shrink: 0;
   margin-left: 8px;
 }
+/* 徽章头：图标方块 + 标题 + 英文小签 */
+.rp-head-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.rp-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.rp-head-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  font-size: 25px;
+  color: #dcae5f;
+  background: rgba(201, 151, 63, 0.1);
+  border: 1px solid rgba(220, 174, 95, 0.28);
+  box-shadow: inset 0 1px 0 rgba(236, 201, 143, 0.14);
+  flex-shrink: 0;
+}
+.rp-head-glyph--sm {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 21px;
+}
+.rp-head-glyph--lg {
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  font-size: 28px;
+}
+.rp-head-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(220, 174, 95, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html.light .rp-head-tag { color: rgba(172, 124, 48, 0.62); }
+html.light .rp-head-glyph {
+  color: #b98a2e;
+  background: rgba(201, 151, 63, 0.08);
+  border-color: rgba(201, 151, 63, 0.32);
+  box-shadow: none;
+}
 .resource-panel-body {
-  padding: 16px 20px 20px;
+  padding: 24px 26px 26px;
 }
 .resource-block {
   margin-bottom: 20px;
@@ -9237,30 +9629,57 @@ html.light .section-title { color: #2c1b10; }
 .resource-block:last-child {
   margin-bottom: 0;
 }
+.resource-block.card {
+  border-radius: 16px;
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
 .resource-block-header {
-  padding: 10px 14px;
+  padding: 16px 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
+.resource-block-header:hover {
+  background: rgba(201, 151, 63, 0.04);
+}
+html.light .resource-block-header {
+  border-bottom-color: var(--border-color);
+}
+html.light .resource-block-header:hover {
+  background: rgba(201, 151, 63, 0.05);
+}
 .resource-block-header .collapse-icon {
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 .resource-block-title {
-  font-size: 1rem;
+  font-size: 1.18rem;
   font-weight: 600;
   margin: 0;
   color: #e6e0d6;
+  letter-spacing: 0.01em;
 }
 html.light .resource-block-title {
   color: #171513;
 }
 .resource-block-body {
-  padding: 12px 14px 14px;
+  padding: 20px 22px 22px;
 }
 .resource-block-body .asset-actions {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 .resource-block-body .asset-list-two {
   gap: 16px;
+}
+/* 资源空态：金边虚线面板 */
+.resource-block-body .empty-tip {
+  padding: 34px 20px;
+  text-align: center;
+  color: #8b8478;
+  font-size: 0.95rem;
+  border: 1px dashed rgba(220, 174, 95, 0.22);
+  border-radius: 14px;
+}
+html.light .resource-block-body .empty-tip {
+  border-color: rgba(201, 151, 63, 0.28);
 }
 .section-desc {
   color: #6b665e;
@@ -9571,38 +9990,38 @@ html.light .empty-tip {
 }
 /* ── 段落分隔标头 ─────────────────────────────── */
 .segment-header {
-  margin: 24px 0 14px;
+  margin: 28px 0 16px;
   position: relative;
 }
 .segment-header:first-child { margin-top: 0; }
 .segment-header-inner {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 18px;
+  gap: 12px;
+  padding: 13px 20px;
   background: linear-gradient(90deg, rgba(220, 174, 95,  0.12) 0%, transparent 80%);
   border-left: 3px solid rgba(220, 174, 95,  0.6);
-  border-radius: 0 10px 10px 0;
+  border-radius: 0 12px 12px 0;
 }
 .segment-index-badge {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: #dcae5f;
   background: rgba(220, 174, 95,  0.15);
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 20px;
   letter-spacing: 0.3px;
   white-space: nowrap;
 }
 .segment-title-text {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #d8d2cb;
   flex: 1;
   letter-spacing: -0.01em;
 }
 .segment-shot-range {
-  font-size: 11px;
+  font-size: 12px;
   color: #6b665e;
   white-space: nowrap;
 }
@@ -9668,26 +10087,26 @@ html.light .storyboard-row:hover {
 .sb-ctrl-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-left: 32px;
-  margin-bottom: 4px;
-  height: 26px;
+  gap: 8px;
+  margin-left: 36px;
+  margin-bottom: 6px;
+  height: 32px;
 }
 .sb-ctrl-num {
   background: var(--el-color-primary);
   color: #fff;
-  border-radius: 5px;
-  width: 22px;
-  height: 22px;
+  border-radius: 7px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   flex-shrink: 0;
 }
 .sb-ctrl-title {
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #e6e0d6;
   max-width: 12em;
@@ -9699,17 +10118,17 @@ html.light .sb-ctrl-title {
   color: #000;
 }
 .sb-movement-tag.el-tag {
-  height: 18px;
-  line-height: 18px;
-  padding: 0 6px;
-  font-size: 11px;
+  height: 22px;
+  line-height: 22px;
+  padding: 0 7px;
+  font-size: 12px;
   margin-left: 6px;
   flex-shrink: 0;
 }
 .sb-ctrl-btn.el-button {
-  height: 22px;
-  padding: 0 8px;
-  font-size: 11px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
 }
 .sb-ctrl-config-btn.el-button {
   border-color: rgba(220, 174, 95,  0.45);
@@ -9735,7 +10154,7 @@ html.light .sb-ctrl-config-btn.el-button:hover {
   margin-left: auto;
   opacity: 0.4;
   transition: opacity 0.2s;
-  height: 22px;
+  height: 28px;
   padding: 0 4px;
 }
 .sb-ctrl-bar:hover .sb-ctrl-delete {
@@ -9744,7 +10163,7 @@ html.light .sb-ctrl-config-btn.el-button:hover {
 .sb-panel {
   flex: 1;
   min-width: 0;
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-right: 1px solid rgba(255,255,255,0.05);
   display: flex;
   flex-direction: column;
@@ -9757,12 +10176,12 @@ html.light .sb-panel {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #e6e0d6;
   margin-bottom: 10px;
 }
-.sb-panel-title .el-icon { font-size: 1rem; color: #b3aca0; }
+.sb-panel-title .el-icon { font-size: 1.1rem; color: #b3aca0; }
 .sb-panel-title-name {
   margin-left: 4px;
   color: #b3aca0;
@@ -9775,38 +10194,38 @@ html.light .sb-panel {
 .sb-script { padding-top: 10px; }
 .sb-script-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .sb-select { flex: 1; min-width: 0; }
-.sb-select-empty { font-size: 0.8rem; color: #8b8478; padding: 8px; }
+.sb-select-empty { font-size: 0.85rem; color: #8b8478; padding: 8px; }
 .sb-selected-thumbs {
-  margin: 10px 0;
-  padding: 8px 0;
+  margin: 12px 0;
+  padding: 10px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 .sb-thumb-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 .sb-thumb-row:last-child { margin-bottom: 0; }
 .sb-thumb-label {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #8b8478;
   flex-shrink: 0;
-  width: 36px;
+  width: 40px;
 }
 .sb-thumb-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 .sb-thumb-item {
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   background: #1f1d1b;
 }
@@ -9814,8 +10233,8 @@ html.light .sb-panel {
   cursor: pointer;
 }
 .sb-thumb-avatar {
-  width: 32px;
-  height: 32px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
 }
 .sb-thumb-add-char {
@@ -9844,11 +10263,11 @@ html.light .sb-thumb-add-char:hover {
 }
 .sb-thumb-prop,
 .sb-thumb-scene {
-  width: 36px;
-  height: 36px;
+  width: 68px;
+  height: 68px;
 }
 .sb-script-row.sb-script-selects {
-  gap: 6px;
+  gap: 8px;
 }
 .sb-script-row.sb-script-selects .sb-select {
   min-width: 0;
@@ -9866,7 +10285,7 @@ html.light .sb-thumb-add-char:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
+  font-size: 1.05rem;
   color: #857e75;
   background: #262320;
 }
@@ -9874,14 +10293,14 @@ html.light .sb-thumb-add-char:hover {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   color: #8b8478;
   margin-bottom: 6px;
 }
 .sb-script-label .el-icon { font-size: 0.9rem; }
 .sb-upload-icon { margin-left: auto; cursor: pointer; color: #b3aca0; }
 .sb-meta {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: #8b8478;
   display: flex;
   gap: 12px;
@@ -10353,7 +10772,7 @@ html.light .sb-video-placeholder {
   background: #c9973f;
   flex-shrink: 0;
 }
-.sb-video-prompt-label > span:not(.sb-dot) { font-size: 0.85rem; color: #e6e0d6; }
+.sb-video-prompt-label > span:not(.sb-dot) { font-size: 0.95rem; color: #e6e0d6; }
 .sb-video-params-bar {
   display: flex;
   align-items: flex-start;
@@ -10378,9 +10797,9 @@ html.light .sb-video-placeholder {
   margin-bottom: 12px;
 }
 .sb-video-prompt-text {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: #b3aca0;
-  line-height: 1.5;
+  line-height: 1.6;
   padding: 8px 0;
 }
 .sb-video-prompt-text--preview {
@@ -10396,16 +10815,16 @@ html.light .sb-video-placeholder {
 .sb-video-prompt-edit .el-textarea { margin-bottom: 8px; }
 .sb-video-prompt-edit-actions { display: flex; gap: 8px; }
 .sb-generate-video-btn { margin-top: 8px; }
-.sb-prompt-label { display: flex; align-items: center; gap: 8px; margin: 10px 0 6px; }
+.sb-prompt-label { display: flex; align-items: center; gap: 8px; margin: 12px 0 7px; }
 .sb-prompt-label .sb-dot { flex-shrink: 0; }
-.sb-prompt-label > span:not(.sb-dot) { font-size: 0.85rem; color: #e6e0d6; }
+.sb-prompt-label > span:not(.sb-dot) { font-size: 0.95rem; color: #e6e0d6; }
 .sb-prompt-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-.sb-prompt-row .sb-prompt-text { flex: 1; min-width: 0; font-size: 0.85rem; color: #b3aca0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sb-prompt-row .sb-prompt-text { flex: 1; min-width: 0; font-size: 0.95rem; color: #b3aca0; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .sb-image-prompt-edit .el-textarea { margin-bottom: 6px; }
 .sb-prompt-edit-actions { display: flex; gap: 8px; }
 .sb-video-fields-collapse { margin: 8px 0; }
-.sb-video-fields-collapse .el-collapse-item__header { font-size: 0.9rem; }
-.sb-prompt-section-title { font-size: 0.9rem; font-weight: 600; color: #e6e0d6; margin-bottom: 8px; }
+.sb-video-fields-collapse .el-collapse-item__header { font-size: 0.95rem; }
+.sb-prompt-section-title { font-size: 0.95rem; font-weight: 600; color: #e6e0d6; margin-bottom: 8px; }
 .sb-prompt-section-title--row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .vp-video-prompt-hint { font-size: 12px; color: #9b958c; line-height: 1.5; }
 .sb-split-audio-tip { font-size: 12px; color: #7d766c; line-height: 1.45; margin: 0 0 8px; }
@@ -10501,46 +10920,91 @@ html.light .sb-video-placeholder {
   0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
   40%            { transform: scale(1);   opacity: 1;   }
 }
+/* 分镜区头部：徽章 + 标题 + 英文小签 + 右侧说明 */
+.sbz-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+html.light .sbz-head { border-bottom-color: var(--border-color); }
+.sbz-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sbz-head-text .section-title {
+  margin: 0;
+  font-size: 1.45rem;
+}
+.sbz-desc {
+  margin: 0 0 0 auto;
+  font-size: 0.92rem;
+  color: #6b665e;
+  text-align: right;
+}
+html.light .sbz-desc { color: var(--text-muted); }
+/* 场记板式配置条 */
+.sb-config-strip {
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+html.light .sb-config-strip {
+  background: var(--bg-inner);
+  border-color: var(--border-color);
+}
 .sb-config-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 10px;
   flex-wrap: wrap;
+}
+.sb-config-strip .sb-config-row + .sb-config-row {
+  margin-top: 14px;
+}
+.sb-narration-export-row {
+  gap: 14px;
 }
 .sb-config-item {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 .sb-config-label {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   color: #b3aca0;
   white-space: nowrap;
 }
 .sb-config-input {
-  width: 110px;
+  width: 122px;
 }
 .sb-config-hint {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: #6b665e;
   white-space: nowrap;
 }
 .sb-config-hint--estimate {
   white-space: normal;
-  max-width: 220px;
-  line-height: 1.35;
+  max-width: 230px;
+  line-height: 1.4;
 }
 .sb-config-divider {
-  color: #453f39;
-  font-size: 0.85rem;
-  margin: 0 4px;
+  width: 1px;
+  height: 26px;
+  margin: 0 10px;
+  background: linear-gradient(180deg, transparent, rgba(220, 174, 95, 0.4), transparent);
+  flex-shrink: 0;
 }
 /* 解说导出行：避免浅色主题下勾选文案与卡片背景对比度不足 */
 .sb-narration-export-row :deep(.el-checkbox__label) {
   color: #e6e0d6;
-  font-size: 0.875rem;
-  line-height: 1.45;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 html.light .sb-narration-export-row :deep(.el-checkbox__label) {
   color: #4a443c;
