@@ -1471,6 +1471,9 @@
               <div v-if="hasSbImage(sb) || storyboardUseFirstLastFrame" class="sb-image-actions">
                 <template v-if="storyboardUseFirstLastFrame">
                   <el-button size="small" :loading="generatingSbFirstImageIds.has(sb.id) || generatingSbLastImageIds.has(sb.id)" @click="onGenerateSbFramePair(sb)">{{ hasSbFirstLastPair(sb) ? '重新生成首尾帧' : '一键生成首尾帧' }}</el-button>
+                  <el-tooltip content="沿用上次生成的随机种子重新生成首尾帧：人物形象与构图保持稳定" placement="top">
+                    <el-button size="small" :loading="generatingSbFirstImageIds.has(sb.id) || generatingSbLastImageIds.has(sb.id)" @click="onGenerateSbFramePair(sb, { lockSeed: true })">锁定重roll</el-button>
+                  </el-tooltip>
                   <el-tooltip content="高清放大仅作用于首帧" placement="top">
                     <el-button size="small" :loading="upscalingSbIds.has(sb.id)" :disabled="!getSbLocalImage(sb)" @click="onUpscaleSbImage(sb)">
                       <el-icon><ZoomIn /></el-icon>超分(首帧)
@@ -1479,6 +1482,9 @@
                 </template>
                 <template v-else>
                 <el-button size="small" :loading="generatingSbImageIds.has(sb.id)" @click="onGenerateSbImage(sb)">重新生成</el-button>
+                <el-tooltip content="沿用上次生成的随机种子：同提示词+参考图下人物与构图保持稳定，仅提示词微调时画面小幅变化" placement="top">
+                  <el-button size="small" :loading="generatingSbImageIds.has(sb.id)" @click="onGenerateSbImage(sb, { lockSeed: true })">锁定重roll</el-button>
+                </el-tooltip>
                 <el-button size="small" :loading="uploadingSbImageId === sb.id" @click="onUploadSbImageClick(sb)">上传</el-button>
                 <el-tooltip content="高清放大（2x超分辨率）" placement="top">
                   <el-button
@@ -4290,7 +4296,7 @@ async function regenerateEditingFramePrompt() {
 // 兼容旧调用
 const showSbFramePromptPreview = openFramePromptEditor
 
-async function onGenerateSbFrameImage(sb, slot) {
+async function onGenerateSbFrameImage(sb, slot, opts = {}) {
   if (!dramaId.value || !sb?.id) return
   const isLast = slot === 'last'
   const loadingSet = isLast ? generatingSbLastImageIds : generatingSbFirstImageIds
@@ -4350,6 +4356,7 @@ async function onGenerateSbFrameImage(sb, slot) {
       aspect_ratio: projectAspectRatio.value || '16:9',
       reference_images: refImagesForCreate,
       use_first_frame_layout_lock: isLast ? !!lastFrameUseFirstLayoutLock.value : undefined,
+      lock_seed: opts.lockSeed ? 1 : undefined,
     })
     ElMessage.success(isLast ? '尾帧生成任务已提交' : '首帧生成任务已提交')
     if (res?.task_id) {
@@ -4391,18 +4398,18 @@ async function onGenerateSbFrameImage(sb, slot) {
   }
 }
 
-async function onGenerateSbFramePair(sb) {
+async function onGenerateSbFramePair(sb, opts = {}) {
   const hasFirst = !!(getSbFirstImage(sb.id) || (sb.image_url || sb.composed_image))
   if (!hasFirst) {
-    await onGenerateSbFrameImage(sb, 'first')
+    await onGenerateSbFrameImage(sb, 'first', opts)
     if (!getSbFirstImage(sb.id) && !(sb.image_url || sb.composed_image)) return
   }
-  await onGenerateSbFrameImage(sb, 'last')
+  await onGenerateSbFrameImage(sb, 'last', opts)
 }
 
 // ──────────────────────────────────────────────────────────────────────
 
-async function onGenerateSbImage(sb) {
+async function onGenerateSbImage(sb, opts = {}) {
   if (!dramaId.value || !sb?.id) return
   sb.errorMsg = ''
   sb.error_msg = ''
@@ -4432,6 +4439,7 @@ async function onGenerateSbImage(sb) {
       style: getSelectedStyle(),
       frame_type: gridMode.value !== 'single' ? gridMode.value : undefined,
       aspect_ratio: projectAspectRatio.value || '16:9',
+      lock_seed: opts.lockSeed ? 1 : undefined,
     })
     ElMessage.success('分镜图生成任务已提交')
     if (res?.task_id) {

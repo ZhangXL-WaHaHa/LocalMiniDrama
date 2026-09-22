@@ -871,7 +871,8 @@ function resolveImageRef(value, filesBaseUrl, storageLocalPath) {
 // 通义万象：支持参考图（角色/场景），content 为 [text, image, image, ...]；本地调试时参考图可转 base64
 // 通义千问 qwen-image：仅支持 content 中一个 text，用同步接口，parameters 不含 stream/enable_interleave
 async function callDashScopeImageApi(config, log, opts) {
-  const { prompt, model, size, image_gen_id, reference_image_urls, files_base_url, storage_local_path, negative_prompt } = opts;
+  const { prompt, model, size, image_gen_id, reference_image_urls, files_base_url, storage_local_path, negative_prompt, seed } = opts;
+  const seedInt = Number.isFinite(Number(seed)) ? Math.trunc(Number(seed)) : null;
   const base = (config.base_url || '').replace(/\/$/, '');
   const url = base + (config.endpoint || '/api/v1/services/aigc/multimodal-generation/generation');
   if (!url.includes('dashscope')) {
@@ -891,6 +892,7 @@ async function callDashScopeImageApi(config, log, opts) {
         prompt_extend: true,
         watermark: false,
         size: qwenImageSize(size),
+        ...(seedInt != null ? { seed: seedInt } : {}),
       },
     };
     if (negative_prompt && String(negative_prompt).trim()) {
@@ -971,6 +973,8 @@ async function callDashScopeImageApi(config, log, opts) {
       enable_interleave: !hasRefs,
       size: dashScopeSize(size),
       stream,
+      // 锁定 seed 重roll：同提示词+同参考图下保持画面稳定，避免人物/构图漂移
+      ...(seedInt != null ? { seed: seedInt } : {}),
       // 多张参考图时注入 negative_prompt，防止生成分割/拼贴布局
       ...(hasRefs ? { negative_prompt: negative_prompt || ANTI_SPLIT_NEGATIVE_PROMPT } : (negative_prompt ? { negative_prompt } : {})),
     },
@@ -1430,8 +1434,10 @@ async function callImageApi(db, log, opts) {
     storage_local_path,
     system_prompt,
     user_negative_prompt,
+    seed,
   } = opts;
   const preferredProvider = preferred_provider ?? opts.preferredProvider;
+  const seedInt = Number.isFinite(Number(seed)) ? Math.trunc(Number(seed)) : null;
   const config = getDefaultImageConfig(db, preferredModel, preferredProvider, imageServiceType);
   if (!config) {
     throw new Error('未配置图片模型，请在「AI 配置」中添加 image 类型且已启用的配置');
@@ -1470,6 +1476,7 @@ async function callImageApi(db, log, opts) {
     imageServiceType,
     ref_count: Array.isArray(opts.reference_image_urls) ? opts.reference_image_urls.length : 0,
     ref_label_injected: effectivePrompt !== (prompt || ''),
+    seed: seedInt,
     effectivePrompt
   });
 
@@ -1488,6 +1495,7 @@ async function callImageApi(db, log, opts) {
       files_base_url: opts.files_base_url,
       storage_local_path: opts.storage_local_path,
       negative_prompt: mergedNegativePrompt,
+      seed: seedInt,
     });
   }
 
@@ -1503,7 +1511,8 @@ async function callImageApi(db, log, opts) {
   if (protocol === 'kling') {
     return callKlingImageApi(config, log, {
       prompt: effectivePrompt, model, size, image_gen_id,
-      reference_image_urls: opts.reference_image_urls,
+      // 可灵仅 1 张参考：优先首帧站位锁（尾帧构图），其次角色外貌参考（人物一致性），最后第一张
+      reference_image_urls: pickKlingSingleReference(opts.reference_image_urls, opts.system_prompt),
       files_base_url: opts.files_base_url,
       storage_local_path: opts.storage_local_path,
     });
@@ -1559,6 +1568,8 @@ async function callImageApi(db, log, opts) {
     ...(mergedNegativePrompt ? { negative_prompt: mergedNegativePrompt } : {}),
     // 参考图字段：volcengine doubao-seedream API 规范使用 image（数组），见官方文档
     ...(resolvedRefs.length > 0 && !isAgnes ? { image: resolvedRefs } : {}),
+    // seed：Seedream/DashScope/SD-WebUI 等支持确定性采样；不识别该字段的网关会忽略
+    ...(seedInt != null && !isAgnes ? { seed: seedInt } : {}),
     // Agnes Image 2.x：response_format 必须放 extra_body；参考图走 extra_body.image
     ...(isAgnes ? {
       extra_body: {
@@ -1889,6 +1900,22 @@ function getStoryboardReferenceLimits(config, modelName) {
     return { total: 1, maxCharacters: 1, maxObjects: 1 };
   }
   return { total: 4, maxCharacters: 3, maxObjects: 4 };
+}
+
+/**
+ * 可灵仅支持 1 张参考图时的取舍：
+ * 1) 尾帧站位锁参考（Image LAYOUT_LOCK，注入时固定排在参考图首位）> 一切 —— 保构图；
+ * 2) 其次角色外貌参考图 —— 保人物一致性（这是跨镜不换脸的关键）；
+ * 3) 最后回退第一张（通常是场景图）。
+ */
+function pickKlingSingleReference(refs, systemPrompt) {
+  if (!Array.isArray(refs) || refs.length <= 1) return refs;
+  const note = String(systemPrompt || '');
+  if (/Image\s+LAYOUT_LOCK/i.test(note) && refs[0]) return [refs[0]];
+  const labels = note.split('\n').filter(Boolean);
+  const charIdx = labels.findIndex((l) => /character appearance reference/i.test(l));
+  if (charIdx >= 0 && refs[charIdx]) return [refs[charIdx]];
+  return refs.slice(0, 1);
 }
 
 function countStoryboardRefsFromLabels(refLabels) {

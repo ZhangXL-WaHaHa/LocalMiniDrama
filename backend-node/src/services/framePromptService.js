@@ -159,7 +159,8 @@ function buildCharacterAnchorText(name, anchors, appearance) {
   return name;
 }
 
-function loadStoryboardCharacterNames(db, storyboardId) {
+/** 结构化角色行：{ name, anchors(已解析对象|null), appearance }，供锚点注入等消费 */
+function loadStoryboardCharacterRows(db, storyboardId) {
   const sid = Number(storyboardId);
   let ids = [];
   let usedExplicitCharactersColumn = false;
@@ -189,6 +190,14 @@ function loadStoryboardCharacterNames(db, storyboardId) {
     }
   }
 
+  const parseRow = (r) => {
+    let anchors = null;
+    if (r.identity_anchors) {
+      try { anchors = JSON.parse(r.identity_anchors); } catch (_) {}
+    }
+    return { name: r.name, anchors, appearance: r.appearance || '' };
+  };
+
   if (!ids.length) {
     if (usedExplicitCharactersColumn) return [];
     // 最后兜底：尝试按名称模糊匹配（某些老数据可能只存了名字）
@@ -201,16 +210,12 @@ function loadStoryboardCharacterNames(db, storyboardId) {
         if (nameMatches.length) {
           const namePlaceholders = nameMatches.map(() => '?').join(',');
           const nameRows = db.prepare(
-            `SELECT id, name, appearance, identity_anchors FROM characters 
-             WHERE name IN (${namePlaceholders}) AND deleted_at IS NULL 
+            `SELECT id, name, appearance, identity_anchors FROM characters
+             WHERE name IN (${namePlaceholders}) AND deleted_at IS NULL
              AND drama_id = (SELECT drama_id FROM episodes WHERE id = (SELECT episode_id FROM storyboards WHERE id = ?))`
           ).all(...nameMatches, sid);
           if (nameRows.length) {
-            return nameRows.map((r) => {
-              let anchors = null;
-              if (r.identity_anchors) { try { anchors = JSON.parse(r.identity_anchors); } catch (_) {} }
-              return buildCharacterAnchorText(r.name, anchors, r.appearance);
-            });
+            return nameRows.map(parseRow);
           }
         }
       }
@@ -230,13 +235,12 @@ function loadStoryboardCharacterNames(db, storyboardId) {
     ).all(...ids);
   }
 
-  return rows.map((r) => {
-    let anchors = null;
-    if (r.identity_anchors) {
-      try { anchors = JSON.parse(r.identity_anchors); } catch (_) {}
-    }
-    return buildCharacterAnchorText(r.name, anchors, r.appearance);
-  });
+  return (rows || []).map(parseRow);
+}
+
+function loadStoryboardCharacterNames(db, storyboardId) {
+  return loadStoryboardCharacterRows(db, storyboardId)
+    .map((r) => buildCharacterAnchorText(r.name, r.anchors, r.appearance));
 }
 
 /** 本剧全部角色名（用于从帧提示词中剔除未勾选出场的人物） */
@@ -612,6 +616,7 @@ module.exports = {
   saveFramePrompt,
   loadStoryboard,
   loadStoryboardCharacterNames,
+  loadStoryboardCharacterRows,
   loadDramaCharacterNamesForStoryboard,
   loadScene,
   buildCharacterAnchorText,

@@ -42,6 +42,7 @@ function rowToItem(r) {
     task_id: r.task_id,
     error_msg: r.error_msg,
     frame_type: r.frame_type ?? undefined,
+    seed: r.seed ?? undefined,
     created_at: r.created_at,
     updated_at: r.updated_at,
     completed_at: r.completed_at,
@@ -547,6 +548,23 @@ function create(db, log, req) {
     });
   }
   const mergedPrompt = mergePromptWithStyle(req.prompt || '', req.style);
+  // seed：显式传入优先；lock_seed=1 时沿用同分镜最近一次成功生成的 seed（锁定重roll，同 prompt+参考图不换脸）
+  let reqSeed = null;
+  if (Number.isFinite(Number(req.seed))) {
+    reqSeed = Math.trunc(Number(req.seed));
+  } else if (req.lock_seed && req.storyboard_id) {
+    try {
+      const prevSeedRow = db.prepare(
+        `SELECT seed FROM image_generations
+         WHERE storyboard_id = ? AND seed IS NOT NULL AND status = 'completed' AND deleted_at IS NULL
+         ORDER BY id DESC LIMIT 1`
+      ).get(Number(req.storyboard_id));
+      if (prevSeedRow && Number.isFinite(Number(prevSeedRow.seed))) {
+        reqSeed = Math.trunc(Number(prevSeedRow.seed));
+        log.info('[图生] lock_seed：沿用上一次生成 seed', { storyboard_id: req.storyboard_id, seed: reqSeed });
+      }
+    } catch (_) {}
+  }
   // 优先使用请求中直接传入的 size；其次将 aspect_ratio 转成 size；未提供则存 NULL 留给 processImageGeneration 从 drama 元数据读取
   let reqSize = req.size || null;
   if (!reqSize && req.aspect_ratio) {
@@ -554,8 +572,8 @@ function create(db, log, req) {
   }
   const useFirstFrameLayoutLock = resolveUseFirstFrameLayoutLock(req, frameType);
   const info = db.prepare(
-    `INSERT INTO image_generations (storyboard_id, drama_id, scene_id, provider, prompt, negative_prompt, model, frame_type, reference_images, use_first_frame_layout_lock, size, status, task_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`
+    `INSERT INTO image_generations (storyboard_id, drama_id, scene_id, provider, prompt, negative_prompt, model, frame_type, reference_images, use_first_frame_layout_lock, size, seed, status, task_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`
   ).run(
     req.storyboard_id ?? null,
     Number(req.drama_id) || 0,
@@ -568,6 +586,7 @@ function create(db, log, req) {
     refImagesJson,
     useFirstFrameLayoutLock,
     reqSize,
+    reqSeed,
     taskId,
     now,
     now
@@ -791,31 +810,35 @@ async function processImageGeneration(db, log, imageGenId) {
       if (sb) {
         const refs = [];
         const refLabels = [];
-        if (sb.scene_id) {
+        // B6: 可灵等单参考模型 —— 角色图优先于场景图（保人物一致性），场景图仅在无角色参考时兜底
+        const isSingleRefMode = refLimits.total === 1;
+        /** 收集当前分镜关联场景的参考图（当前主图 → 历史 quad_panel_0 面板） */
+        const collectSceneRef = () => {
+          if (!sb.scene_id) return;
           const scene = db.prepare('SELECT image_url, local_path, location FROM scenes WHERE id = ? AND deleted_at IS NULL').get(sb.scene_id);
-          if (scene) {
-            const locationName = scene.location || 'scene';
-            // 优先使用 scenes 表当前主图（image_url / local_path），只有当前字段为空才降级使用历史 quad_panel_0 面板
-            // 这样“重新生成场景图”后，分镜图生成能立即取到最新图片
-            let sceneRef = scene.local_path || scene.image_url;
-            let isPanel = false;
-            if (!sceneRef) {
-              const scenePanel = db.prepare(
-                `SELECT local_path, image_url FROM image_generations
-                 WHERE scene_id = ? AND frame_type = 'quad_panel_0' AND status = 'completed'
-                 ORDER BY id DESC LIMIT 1`
-              ).get(sb.scene_id);
-              if (scenePanel && (scenePanel.local_path || scenePanel.image_url)) {
-                sceneRef = scenePanel.local_path || scenePanel.image_url;
-                isPanel = true;
-              }
-            }
-            if (sceneRef && imageClient.canAddStoryboardObjectRef(refLabels, refLimits)) {
-              refs.push(sceneRef);
-              refLabels.push(`Image ${refs.length}: scene background reference for "${locationName}"${isPanel ? ' (establishing wide shot from history panel)' : ' (current scene image)'} `);
+          if (!scene) return;
+          const locationName = scene.location || 'scene';
+          // 优先使用 scenes 表当前主图（image_url / local_path），只有当前字段为空才降级使用历史 quad_panel_0 面板
+          // 这样“重新生成场景图”后，分镜图生成能立即取到最新图片
+          let sceneRef = scene.local_path || scene.image_url;
+          let isPanel = false;
+          if (!sceneRef) {
+            const scenePanel = db.prepare(
+              `SELECT local_path, image_url FROM image_generations
+               WHERE scene_id = ? AND frame_type = 'quad_panel_0' AND status = 'completed'
+               ORDER BY id DESC LIMIT 1`
+            ).get(sb.scene_id);
+            if (scenePanel && (scenePanel.local_path || scenePanel.image_url)) {
+              sceneRef = scenePanel.local_path || scenePanel.image_url;
+              isPanel = true;
             }
           }
-        }
+          if (sceneRef && imageClient.canAddStoryboardObjectRef(refLabels, refLimits)) {
+            refs.push(sceneRef);
+            refLabels.push(`Image ${refs.length}: scene background reference for "${locationName}"${isPanel ? ' (establishing wide shot from history panel)' : ' (current scene image)'} `);
+          }
+        };
+        if (!isSingleRefMode) collectSceneRef();
         /** 分镜 characters 列：null=未配置走兼容逻辑；数组=显式勾选（含空数组=不要任何角色参考） */
         let explicitDramaCharIds = null;
         let charListParsed = null;
@@ -834,11 +857,16 @@ async function processImageGeneration(db, log, imageGenId) {
           }
         }
         if (charListParsed && charListParsed.length) {
+          // B6: 参考图超过上限时优先保留主角 —— role='main' 的角色排在前面对齐裁剪额度
+          const charItems = [];
           for (const item of charListParsed) {
-            if (!imageClient.canAddStoryboardCharacterRef(refLabels, refLimits)) break;
             const cid = typeof item === 'object' && item != null ? item.id : item;
-            const c = db.prepare('SELECT image_url, local_path, name FROM characters WHERE id = ? AND deleted_at IS NULL').get(Number(cid));
-            if (!c) continue;
+            const c = db.prepare('SELECT image_url, local_path, name, role FROM characters WHERE id = ? AND deleted_at IS NULL').get(Number(cid));
+            if (c) charItems.push(c);
+          }
+          charItems.sort((a, b) => (a.role === 'main' ? 0 : 1) - (b.role === 'main' ? 0 : 1));
+          for (const c of charItems) {
+            if (!imageClient.canAddStoryboardCharacterRef(refLabels, refLimits)) break;
             // 优先使用 characters 表当前主图（image_url / local_path），只有当前字段为空才降级使用历史 quad_panel_1 面板
             let charRef = c.local_path || c.image_url;
             let isPanel = false;
@@ -847,7 +875,7 @@ async function processImageGeneration(db, log, imageGenId) {
                 `SELECT local_path, image_url FROM image_generations
                  WHERE character_id = ? AND frame_type = 'quad_panel_1' AND status = 'completed'
                  ORDER BY id DESC LIMIT 1`
-              ).get(Number(cid));
+              ).get(Number(c.id));
               if (charPanel && (charPanel.local_path || charPanel.image_url)) {
                 charRef = charPanel.local_path || charPanel.image_url;
                 isPanel = true;
@@ -951,7 +979,7 @@ async function processImageGeneration(db, log, imageGenId) {
             );
 
             const dramaChars = db.prepare(
-              'SELECT id, name FROM characters WHERE drama_id = ? AND deleted_at IS NULL'
+              'SELECT id, name, role FROM characters WHERE drama_id = ? AND deleted_at IS NULL ORDER BY CASE WHEN role = \'main\' THEN 0 ELSE 1 END, id ASC'
             ).all(Number(row.drama_id));
 
             for (const dChar of dramaChars) {
@@ -1004,6 +1032,8 @@ async function processImageGeneration(db, log, imageGenId) {
         if (explicitDramaCharIds !== null) {
           skipStep23PromptCharFilter = true;
         }
+        // 可灵等单参考模式：没有任何角色参考时，回退收集场景参考，避免完全无参考
+        if (isSingleRefMode && refs.length === 0) collectSceneRef();
         if (refs.length > 0) {
           if (!reference_image_urls || reference_image_urls.length === 0) {
             reference_image_urls = refs;
@@ -1113,6 +1143,91 @@ async function processImageGeneration(db, log, imageGenId) {
       }
     }
 
+    // ── Step 2.4: 保底参考图 —— 分镜在 Step2/2.3 后仍无任何参考图时，回退到本剧主角图 + 首个有图场景 ──
+    // 目的：杜绝“未关联素材的分镜”退化成纯文生图，造成跨镜角色/场景不一致。
+    // 例外：分镜 characters 列被显式配置为空数组（用户明确不要任何角色参考）时不做回退。
+    if (
+      row.storyboard_id &&
+      row.drama_id &&
+      (!reference_image_urls || reference_image_urls.length === 0)
+    ) {
+      try {
+        let explicitEmptyChars = false;
+        try {
+          const sbCharsRow = db.prepare('SELECT characters FROM storyboards WHERE id = ? AND deleted_at IS NULL').get(Number(row.storyboard_id));
+          if (sbCharsRow?.characters != null && String(sbCharsRow.characters).trim() !== '') {
+            const parsedChars = JSON.parse(sbCharsRow.characters);
+            if (Array.isArray(parsedChars) && parsedChars.length === 0) explicitEmptyChars = true;
+          }
+        } catch (_) {}
+
+        const fallbackRefs = [];
+        const fallbackLabels = [];
+
+        // 1) 主角图（role='main' 优先，其次第一个有图角色）
+        if (!explicitEmptyChars && imageClient.canAddStoryboardCharacterRef(fallbackLabels, refLimits)) {
+          const mainChar = db.prepare(
+            `SELECT id, name, image_url, local_path FROM characters
+             WHERE drama_id = ? AND deleted_at IS NULL
+               AND ((local_path IS NOT NULL AND local_path != '') OR (image_url IS NOT NULL AND image_url != ''))
+             ORDER BY CASE WHEN role = 'main' THEN 0 ELSE 1 END, id ASC
+             LIMIT 1`
+          ).get(Number(row.drama_id));
+          let charRef = mainChar ? (mainChar.local_path || mainChar.image_url) : null;
+          if (!charRef && mainChar) {
+            const charPanel = db.prepare(
+              `SELECT local_path, image_url FROM image_generations
+               WHERE character_id = ? AND frame_type = 'quad_panel_1' AND status = 'completed'
+               ORDER BY id DESC LIMIT 1`
+            ).get(Number(mainChar.id));
+            if (charPanel) charRef = charPanel.local_path || charPanel.image_url;
+          }
+          if (charRef && mainChar?.name) {
+            fallbackRefs.push(charRef);
+            fallbackLabels.push(`Image ${fallbackRefs.length}: character appearance reference for "${mainChar.name}" (fallback main character anchor for cross-shot consistency)`);
+          }
+        }
+
+        // 2) 首个有图场景
+        if (imageClient.canAddStoryboardObjectRef(fallbackLabels, refLimits)) {
+          const firstScene = db.prepare(
+            `SELECT id, location, image_url, local_path FROM scenes
+             WHERE drama_id = ? AND deleted_at IS NULL
+               AND ((local_path IS NOT NULL AND local_path != '') OR (image_url IS NOT NULL AND image_url != ''))
+             ORDER BY id ASC
+             LIMIT 1`
+          ).get(Number(row.drama_id));
+          let sceneRef = firstScene ? (firstScene.local_path || firstScene.image_url) : null;
+          if (!sceneRef && firstScene) {
+            const scenePanel = db.prepare(
+              `SELECT local_path, image_url FROM image_generations
+               WHERE scene_id = ? AND frame_type = 'quad_panel_0' AND status = 'completed'
+               ORDER BY id DESC LIMIT 1`
+            ).get(Number(firstScene.id));
+            if (scenePanel) sceneRef = scenePanel.local_path || scenePanel.image_url;
+          }
+          if (sceneRef && firstScene?.location) {
+            fallbackRefs.push(sceneRef);
+            fallbackLabels.push(`Image ${fallbackRefs.length}: scene background reference for "${firstScene.location}" (fallback scene anchor for cross-shot consistency)`);
+          }
+        }
+
+        if (fallbackRefs.length > 0) {
+          reference_image_urls = fallbackRefs;
+          reference_context_note = fallbackLabels.join('\n');
+          reference_source = 'fallback main character + first scene';
+          log.info('[图生] Step2.4 保底参考图已注入（主角 + 首场景）', {
+            id: imageGenId,
+            storyboard_id: row.storyboard_id,
+            count: fallbackRefs.length,
+            elapsed: elapsed(),
+          });
+        }
+      } catch (fallbackErr) {
+        log.warn('[图生] Step2.4 保底参考图注入失败（继续纯文生图）', { id: imageGenId, error: fallbackErr.message });
+      }
+    }
+
     // ── Step 2.5: 单张分镜图 + 有参考图时，记录参考图映射（由 callGeminiImageApi 处理 parts 结构）───
     // Gemini 正确做法：文字说明→参考图→生成指令（交替结构），在 imageClient 中组装
     // 这里只记录日志，不再污染主 prompt 文本
@@ -1197,6 +1312,50 @@ async function processImageGeneration(db, log, imageGenId) {
             .map((l) => l.replace(/^Image \d+: [^"]*"([^"]+)".*/, '$1'))
             .filter(Boolean).join(', ');
 
+          // ── A1/A2: 角色身份锚点注入，统一外貌策略 ─────────────────────────────
+          // 有参考图的角色 → 输出必须写「名字（参考图中的人物形象）」，禁止文字描述外貌（交给参考图）
+          // 无参考图的角色 → 注入 identity_anchors/appearance 锚点，要求逐字复用，禁止润色 AI 自行编造外貌
+          let refCharNamesLine = null;
+          let identityAnchorsLines = null;
+          try {
+            const framePromptService = require('./framePromptService');
+            const refCharNames = new Set(
+              (reference_context_note || '').split('\n')
+                .map((l) => {
+                  const m = String(l).match(/character appearance reference for\s+"([^"]+)"/i);
+                  return m ? m[1].trim() : null;
+                })
+                .filter(Boolean)
+                .map((n) => n.toLowerCase())
+            );
+            // 分镜勾选的角色（storyboards.characters 优先，回退 storyboard_characters）
+            const anchorRows = framePromptService.loadStoryboardCharacterRows
+              ? framePromptService.loadStoryboardCharacterRows(db, row.storyboard_id)
+              : [];
+            const withRef = [];
+            const withoutRef = [];
+            for (const r of anchorRows) {
+              if (!r?.name) continue;
+              if (refCharNames.has(String(r.name).trim().toLowerCase())) {
+                withRef.push(r.name);
+              } else {
+                const anchorText = framePromptService.buildCharacterAnchorText(r.name, r.anchors, r.appearance);
+                if (anchorText && anchorText !== r.name) withoutRef.push(anchorText);
+              }
+            }
+            if (withRef.length > 0) {
+              refCharNamesLine = `REFERENCE_CHARACTERS (characters WITH reference images — write each EXACTLY as 名字（参考图中的人物形象）, NEVER describe their appearance/clothing in text): ${withRef.join(', ')}`;
+            }
+            if (withoutRef.length > 0) {
+              identityAnchorsLines = [
+                `CHARACTER_IDENTITY_ANCHORS (characters WITHOUT reference images — repeat their identity features below VERBATIM, do NOT invent/alter/add any appearance detail):`,
+                ...withoutRef.map((t) => `- ${t}`),
+              ].join('\n');
+            }
+          } catch (anchorErr) {
+            log.warn('[图生] Step3.5 角色锚点装载失败（继续）', { id: imageGenId, error: anchorErr.message });
+          }
+
           // 获取分镜详细字段（action / dialogue / result / atmosphere / shot_type）
           let sbDetail = null;
           try {
@@ -1229,7 +1388,7 @@ async function processImageGeneration(db, log, imageGenId) {
             } catch (_) {}
           }
 
-          const userPromptLines = [
+          const userPrompt = [
             ...styleBlockLines,
             `PROMPT: ${row.prompt}`,
             sbDetail?.action     ? `ACTION: ${sbDetail.action}`        : null,
@@ -1239,12 +1398,13 @@ async function processImageGeneration(db, log, imageGenId) {
             sbDetail?.shot_type  ? `SHOT_TYPE: ${sbDetail.shot_type}`  : null,
             `STYLE_TOKENS (repeat in output): ${style}`,
             `ASSETS: ${assetNames || 'none'}`,
+            refCharNamesLine,
+            identityAnchorsLines,
             prevContinuityState  ? `PREV_CONTINUITY_STATE: ${JSON.stringify(prevContinuityState)}` : null,
             `CONTEXT_PREV: ${prevDesc}`,
             `CONTEXT_NEXT: ${nextDesc}`,
             `REMINDER: Output a STATIC SINGLE-FRAME image prompt only. No camera motion, no transitions, no split panels.`,
-          ].filter(Boolean);
-          const userPrompt = userPromptLines.join('\n');
+          ].filter(Boolean).join('\n');
           const systemPrompt = promptI18n.getImagePolishPrompt(cfg);
           const polishedPrompt = await aiClient.generateText(db, log, 'text', userPrompt, systemPrompt, {
             scene_key: 'image_polish',
@@ -1368,6 +1528,7 @@ async function processImageGeneration(db, log, imageGenId) {
       model: row.model,
       size: imageSize,
       quality: row.quality,
+      seed: row.seed ?? undefined,
       drama_id: row.drama_id,
       character_id: row.character_id,
       image_gen_id: imageGenId,

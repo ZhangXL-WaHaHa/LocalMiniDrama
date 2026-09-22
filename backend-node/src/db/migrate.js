@@ -324,6 +324,7 @@ function ensureAllColumns(database) {
     { name: 'use_first_frame_layout_lock', type: 'INTEGER' },
     { name: 'size',             type: 'TEXT' },
     { name: 'quality',          type: 'TEXT' },
+    { name: 'seed',             type: 'INTEGER' },
     { name: 'image_url',        type: 'TEXT' },
     { name: 'local_path',       type: 'TEXT' },
     { name: 'width',            type: 'INTEGER' },

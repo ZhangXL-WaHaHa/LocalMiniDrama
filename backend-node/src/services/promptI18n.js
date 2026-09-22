@@ -1271,7 +1271,7 @@ CRITICAL RULES:
 4. Length: 50–100 words
 5. Structure: [Shot framing] + [Scene/environment] + [Characters' frozen poses/expressions] + [Lighting at this exact instant] + [Atmosphere] + [Style tokens]
 6. Describe characters' POSE and EXPRESSION at peak moment — not their motion arc
-7. Preserve character names exactly as listed in ASSETS (they are reference image anchors)
+7. Preserve character names exactly as listed in ASSETS (they are reference image anchors). Characters listed in REFERENCE_CHARACTERS (they have reference images) must be written EXACTLY as "Name (person from the reference image)" with NO appearance/clothing description in text — their look is fully determined by the reference images. Characters listed in CHARACTER_IDENTITY_ANCHORS (no reference images) must have their identity features repeated VERBATIM from the anchors — never invent, alter, or add appearance details. If neither line is provided, do not describe any character's appearance — names + pose/expression only
 8. **Style (mandatory):** Honor the 画风 / MANDATORY ART STYLE lines at the TOP of the user message AND the STYLE_TOKENS line — weave the same visual style through the whole prompt; the closing clause must repeat those style keywords (do not drop or replace them with generic words)
 9. CONTINUITY: If PREV_CONTINUITY_STATE is provided, you MUST maintain consistency with the previous shot:
    - Match character clothing exactly (same outfit, same accessories)
@@ -1288,6 +1288,8 @@ ATMOSPHERE: <lighting and mood>
 SHOT_TYPE: <framing type>
 STYLE_TOKENS: <art style keywords — must appear in your output>
 ASSETS: <character/scene names with reference images>
+REFERENCE_CHARACTERS: <characters WITH reference images — write each only as "Name (person from the reference image)">
+CHARACTER_IDENTITY_ANCHORS: <identity feature anchors for characters WITHOUT reference images — repeat verbatim>
 PREV_CONTINUITY_STATE: <JSON snapshot of character states from previous shot — clothing, position, expression>
 CONTEXT_PREV: <previous shot action summary for continuity>
 CONTEXT_NEXT: <next shot summary — ignore for image, relevant only for mood>`;
@@ -1314,12 +1316,14 @@ CONTEXT_NEXT: <next shot summary — ignore for image, relevant only for mood>`;
    第5层-视觉风格：必须完整重复用户消息顶部的画风词 + 电影分镜质感 + 图片比例 + 情绪收束
 
 5. **角色外貌描述铁律（最高优先级，任何违反均视为失败）**：
-   - 角色外貌**仅允许使用固定身份特征**（脸型、五官、发型、肤质、皮肤纹理、独特标记、年龄性别等）。
-   - **严禁在 prompt 任何位置添加、推断、暗示任何服装、衣着、服饰、配饰、鞋帽、居家服、西装、裙装、loungewear 等描述**。
+   - REFERENCE_CHARACTERS 行列出的角色（已有参考图）：输出中**必须且只能**写成「角色名（参考图中的人物形象）」，**禁止**为其编写任何外貌、五官、发型、服装、配饰等文字描述——其形象完全由参考图决定。
+   - CHARACTER_IDENTITY_ANCHORS 行列出的角色（无参考图）：外貌描述**必须逐字复用**锚点中的固定身份特征（脸型、五官、发型、肤质、独特标记、年龄性别等），**严禁增删改写或凭空编造**任何未列出的外貌细节。
+   - 两行都未提供时，**不要为任何角色编写外貌描述**，只写名字 + 姿态/表情。
+   - **严禁在 prompt 任何位置添加、推断、暗示任何服装、衣着、服饰、配饰、鞋帽、居家服、西装、裙装、loungewear 等描述**（除非锚点中本来就包含）。
    - 服装、穿着、配饰完全由参考图（ASSETS 中列出的角色参考图）决定，**文字提示词中绝不出现任何服装相关词汇**。
    - 只有当固定身份特征中本来就包含眼镜、疤痕、纹身等辨识标记时，才可极简提及；否则一律不提。
 
-6. 严格保留 ASSETS 列表中的角色名称（它们是参考图锚点），格式示例：“李娟（圆脸、高鼻梁、短发、面容略带疲惫）”。
+6. 严格保留 ASSETS 列表中的角色名称（它们是参考图锚点）。有参考图的角色格式示例：“李娟（参考图中的人物形象）”；无参考图的角色格式示例：“李娟（圆脸、高鼻梁、短发）+ 锚点中列出的特征逐字复用”。
 
 7. **画风·最高优先级**：必须完全融入用户消息顶部的【画风·最高优先级】和 STYLE_TOKENS 行，结尾必须重复这些关键词（不要用泛化词替换）。
 
@@ -1338,6 +1342,8 @@ ATMOSPHERE: <光线与情绪>
 SHOT_TYPE: <景别>
 STYLE_TOKENS: <必须在输出中重复的画风关键词>
 ASSETS: <角色/场景名称 + 参考图说明>
+REFERENCE_CHARACTERS: <已有参考图的角色名单 —— 输出中只写「名字（参考图中的人物形象）」>
+CHARACTER_IDENTITY_ANCHORS: <无参考图角色的固定身份特征锚点 —— 必须逐字复用>
 PREV_CONTINUITY_STATE: <上一镜头的连戏状态快照 JSON，含服装/位置/表情>
 CONTEXT_PREV / CONTEXT_NEXT: 上下文（仅用于情绪参考）
 
