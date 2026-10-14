@@ -1583,4 +1583,14 @@ html.light .res-tab--drama.active::after { background: #a67832; }
 @media (prefers-reduced-motion: reduce) {
   .script-card, .script-card:hover { transition: none; }
 }
+
+/* ── 移动端适配 ── */
+@media (max-width: 768px) {
+  .header { padding: 10px 14px; }
+  .header-inner { flex-wrap: wrap; gap: 8px; }
+  .logo-sub { display: none; }
+  .header-actions { margin-left: 0; width: 100%; flex-wrap: wrap; }
+  .main { padding: 16px 12px 48px; gap: 16px; }
+  .script-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+}
 </style>

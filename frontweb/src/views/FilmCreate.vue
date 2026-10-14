@@ -8798,14 +8798,58 @@ html.light .quick-nav {
 .quick-nav.collapsed .nav-group {
   display: none;
 }
+/* ── 平板（≤1100px）：分镜三栏竖排，控制栏换行，双列素材卡归一 ── */
+@media (max-width: 1100px) {
+  .storyboard-row { flex-direction: column; align-items: stretch; }
+  .storyboard-row .sb-panel { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+  .storyboard-row .sb-panel:last-child { border-bottom: none; }
+  html.light .storyboard-row .sb-panel { border-bottom-color: rgba(220, 174, 95, 0.08); }
+  .sb-ctrl-bar { flex-wrap: wrap; margin-left: 0; height: auto; row-gap: 6px; }
+  .asset-list-two { grid-template-columns: 1fr; }
+}
 @media (max-width: 768px) {
   .quick-nav { left: 48px; width: 48px; padding: 12px 0; }
   .quick-nav .nav-steps, .quick-nav .nav-group { display: none; }
   .quick-nav .nav-sidebar-title { display: none; }
   .quick-nav .nav-sidebar-header { justify-content: center; padding: 0 4px 8px; }
   .header, .main { margin-left: 48px !important; }
+  .header { padding: 8px 12px; }
+  .header-inner { flex-wrap: wrap; gap: 8px 10px; }
+  .logo { flex-shrink: 0; }
+  .logo-sub, .breadcrumb-sep { display: none; }
+  .page-title {
+    min-width: 0;
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .header-actions { margin-left: auto; }
   .main { padding: 16px 12px 48px; }
-  .asset-list-two { grid-template-columns: 1fr; }
+  .card { padding: 14px; border-radius: 12px; }
+  /* 剧本工作台主视觉缩放 */
+  .swb-mast-mark { display: none; }
+  .swb-title { font-size: 1.55rem; }
+  .swb-eyebrow { font-size: 0.7rem; letter-spacing: 0.18em; gap: 8px; }
+  .swb-rule { width: 24px; }
+  .sbz-desc { width: 100%; margin: 0; text-align: left; }
+  .sbz-head-text .section-title { font-size: 1.2rem; }
+  /* 素材卡（角色/道具/场景）：左右布局改上下 */
+  .asset-item-left-right { flex-direction: column; }
+  .asset-item-left-right .asset-cover-wrap { width: 100%; }
+  .asset-item-left-right .asset-cover { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+  /* 资源面板与配置条收紧留白 */
+  .resource-panel .collapse-header { padding: 14px 16px; }
+  .resource-panel-body { padding: 14px 14px 16px; }
+  .resource-block-header { padding: 12px 14px; }
+  .resource-block-body { padding: 14px; }
+  .sb-config-strip { padding: 12px 14px; }
+  /* 分镜图/视频操作按钮行允许换行 */
+  .sb-image-actions, .sb-video-actions, .asset-actions, .swb-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 /* 当前任务面板 */
 .atp-panel {

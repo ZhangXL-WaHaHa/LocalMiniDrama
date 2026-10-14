@@ -1142,4 +1142,8 @@ onBeforeUnmount(() => {
 <style>
 html.light .drama-canvas-page { background: var(--bg-page); }
 html.light .vue-flow-canvas { background: #f8f1e3; }
+@media (max-width: 768px) {
+  .workflow-bar { flex-wrap: wrap; row-gap: 6px; }
+  .header-inner { padding: 8px 12px 4px; }
+}
 </style>

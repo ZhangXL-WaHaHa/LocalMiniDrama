@@ -475,4 +475,12 @@ onMounted(loadMedia)
   font-weight: 500;
   color: #4a443c;
 }
+
+/* ── 移动端适配 ── */
+@media (max-width: 768px) {
+  .media-library-page { padding: 12px; }
+  .page-header { flex-wrap: wrap; gap: 10px; }
+  .search-input { width: 100%; }
+  .media-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+}
 </style>

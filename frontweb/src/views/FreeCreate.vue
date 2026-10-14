@@ -583,4 +583,15 @@ async function pollVideoTask(taskId, item) {
   object-fit: contain;
   border-radius: 8px;
 }
+
+/* ── 移动端适配：输入面板与结果区改上下布局 ── */
+@media (max-width: 900px) {
+  .create-layout { flex-direction: column; }
+  .input-panel { width: 100%; }
+}
+@media (max-width: 768px) {
+  .free-create-page { padding: 12px; }
+  .page-title { font-size: 18px; }
+  .result-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+}
 </style>

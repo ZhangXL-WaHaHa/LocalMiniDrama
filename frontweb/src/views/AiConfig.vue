@@ -125,7 +125,15 @@ html.light .page-title { color: #7d766c; }
 }
 html.light .main {
   background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(220, 174, 95,   0.15);
-  box-shadow: 0 4px 20px rgba(220, 174, 95,   0.08);
+  border-color: rgba(220, 174, 95,  0.15);
+  box-shadow: 0 4px 20px rgba(220, 174, 95,  0.08);
+}
+
+/* ── 移动端适配 ── */
+@media (max-width: 768px) {
+  .header { padding: 10px 14px; }
+  .header-inner { flex-wrap: wrap; gap: 8px; }
+  .logo-sub { display: none; }
+  .main { margin: 12px; padding: 14px; border-radius: 12px; }
 }
 </style>

@@ -789,3 +789,18 @@ html.light .el-table tr .el-button.is-link span { color: var(--accent-600) !impo
 .el-message .el-message__closeBtn { font-size: 18px !important; }
 html.dark .el-message--error { box-shadow: 0 4px 24px rgba(0, 0, 0, .35); }
 html.light .el-message--error { box-shadow: 0 4px 20px rgba(244, 63, 94, .18); }
+
+/* ----------------------------------------------------
+   七、移动端适配：弹窗/确认框宽度钳制，避免超出屏幕
+   ---------------------------------------------------- */
+@media (max-width: 768px) {
+  .el-dialog {
+    width: 92vw !important;
+    max-width: 92vw !important;
+    margin: 6vh auto !important;
+  }
+  .el-message-box {
+    width: 88vw !important;
+    max-width: 88vw !important;
+  }
+}

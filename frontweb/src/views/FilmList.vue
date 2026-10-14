@@ -1198,6 +1198,16 @@ onMounted(() => {
   from { background-position: 0 0, 0 0; }
   to { background-position: 0 0, -156px 0; }
 }
+/* ── 窄屏（≤1300px）：幕布拉开后整体淡出，收拢的侧幕条不再保留，避免遮挡银幕内容 ──
+   宽屏（>1300px）时侧幕位于 1120px 银幕外侧，保留影院画框效果 */
+@media (max-width: 1300px) {
+  .curtain-reveal {
+    animation: curtain-fade-out 0.8s ease 1.15s both;
+  }
+}
+@keyframes curtain-fade-out {
+  to { opacity: 0; visibility: hidden; }
+}
 
 /* —— 宽银幕（四周灯泡，视差主体） —— */
 .screen {
@@ -2113,32 +2123,58 @@ html.light .badge-status--draft {
   object-fit: contain;
 }
 
+/* ===================== 移动端 · 首屏影院适配 ===================== */
 @media (max-width: 768px) {
-  .hero { padding-top: 32px; min-height: 0; }
-  .hero-backdrop { font-size: clamp(4rem, 22vw, 8rem); }
-  .hero-dust span:nth-child(n+8) { display: none; }
-  .bokeh span:nth-child(n+6) { display: none; }
-  .screen-body { padding: 44px 20px 48px; }
-  .hero-billing { font-size: 0.62rem; letter-spacing: 0.3em; text-indent: 0.3em; }
-  .hero-credits { gap: 8px; font-size: 0.66rem; }
-  .hero-eyebrow::before,
-  .hero-eyebrow::after { width: 28px; }
-  .screen-reflection { height: 36px; }
+  /* —— Hero 整体：去最小高度、收紧留白 —— */
+  .hero { padding: 20px 12px 16px; min-height: 0; gap: 14px; }
+  .hero-backdrop { font-size: clamp(3.2rem, 18vw, 5rem); top: -10px; }
+  /* 移动端隐藏重装饰（光柱/光束/尘埃）：省性能、聚焦内容 */
+  .godray, .beam--left, .beam--right, .hero-dust { display: none; }
+  .bokeh span:nth-child(n+5) { display: none; }
+
+  /* —— 宽银幕 —— */
+  .screen { border-radius: 14px; }
   .bulb-row { padding: 8px 10px 0; }
   .bulb-row:last-child { padding: 0 10px 8px; }
-  .bulb-row .bulb:nth-child(n+13) { display: none; }
+  .bulb-row .bulb:nth-child(n+11) { display: none; }
+  .screen-body { padding: 30px 16px 34px; }
+  .hero-eyebrow { font-size: 0.66rem; letter-spacing: 0.2em; gap: 10px; flex-wrap: wrap; }
+  .hero-eyebrow::before,
+  .hero-eyebrow::after { width: 22px; }
+  .hero-title { font-size: clamp(1.9rem, 8.5vw, 2.4rem); margin-bottom: 8px; }
+  .hero-billing { font-size: 0.58rem; letter-spacing: 0.3em; text-indent: 0.3em; margin-bottom: 10px; }
+  .hero-sub { font-size: 0.85rem; margin-bottom: 18px; }
+  /* 主按钮：全宽并排，触达友好 */
+  .hero-actions { width: 100%; gap: 10px; }
+  .hero-actions .el-button { flex: 1 1 auto; min-width: 0; margin-left: 0 !important; }
+  .hero-credits { margin-top: 18px; gap: 8px; font-size: 0.64rem; }
+  .screen-reflection { height: 28px; }
+
+  /* —— 票根统计：等分铺满，去旋转与穿孔 —— */
   .ticket-row { gap: 10px; }
-  .ticket { min-width: 150px; padding: 10px 14px 10px 12px; gap: 10px; }
-  .ticket-num { font-size: 1.3rem; }
-  .marquee-bar { padding: 8px 12px; }
-  .marquee-bulbs .bulb:nth-child(n+15) { display: none; }
-  .marquee-title-text { font-size: 1.2rem; }
-  .project-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 14px; }
-  .cover-glyph { font-size: 3.6rem; }
-  .toolbar-search { width: 100%; flex: 1; }
-  .toolbar-actions { width: 100%; }
-  .reel-frame { width: 118px; margin-right: 8px; }
-  .reel-gallery { padding: 17px 0; }
+  .ticket { flex: 1 1 140px; min-width: 0; padding: 10px 12px 10px 10px; gap: 10px; transform: none; }
+  .ticket:hover { transform: none; }
+  .ticket::before, .ticket::after { display: none; }
+  .ticket-num { font-size: 1.25rem; }
+
+  /* —— 红幕布：缩短开场等待 —— */
+  .reveal-half--left {
+    animation: reveal-open-l 1.1s cubic-bezier(.72, 0, .22, 1) 0.2s both,
+               reveal-fabric-l 1.1s linear 0.2s both;
+  }
+  .reveal-half--right {
+    animation: reveal-open-r 1.1s cubic-bezier(.72, 0, .22, 1) 0.2s both,
+               reveal-fabric-r 1.1s linear 0.2s both;
+  }
+
+  /* —— 胶片画廊：纯装饰，手机隐藏省空间 —— */
+  .reel-gallery { display: none; }
+
+  /* —— 排片行 / 海报墙 —— */
+  .ns-head { flex-wrap: wrap; align-items: flex-start; }
+  .ns-title { font-size: 1.35rem; }
+  .toolbar-search { min-width: 140px; }
+  .poster-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 }
 
 /* 动效减弱：停用开场序列与循环光效 */
